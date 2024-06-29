@@ -6,7 +6,17 @@ type User = {
 };
 
 type Message = {
+  messageId: string;
   message: string;
   userId: string;
+  timestamp: import("firebase/firestore").Timestamp;
+};
+
+type Chat = {
+  id: string;
+  chatName: string;
+  chatImage: string;
+  lastMessage: string | null;
+  lastMessageUserId: string | null;
   timestamp: import("firebase/firestore").Timestamp;
 };

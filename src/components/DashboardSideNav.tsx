@@ -19,10 +19,12 @@ import { auth } from "@/lib/firebase";
 import Image from "next/image";
 import { User } from "firebase/auth";
 import { DocumentData } from "firebase/firestore";
+import { usePathname } from "next/navigation";
 
 type DashboardSideNavProps = {
   className?: ClassValue;
   user: User | null | undefined;
+  recentChats: Chat[] | undefined;
   friendRequests: DocumentData[] | undefined;
 };
 
@@ -60,24 +62,19 @@ export const navLinks: LinkType[] = [
   },
 ];
 
-export const chats = [
-  {
-    name: "Example User",
-    href: "/dashboard/chat/dummyuserid",
-  },
-];
-
 export default function DashboardSideNav({
   className,
   user,
+  recentChats,
   friendRequests,
 }: DashboardSideNavProps) {
   const [signOut, signOutLoading, signOutError] = useSignOut(auth);
+  const pathname = usePathname();
 
   return (
     <nav
       className={cn(
-        "h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col min-w-96 border-r border-orange-200 bg-orange-50",
+        "h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col w-96 border-r border-orange-200 bg-orange-50",
         className
       )}
     >
@@ -94,21 +91,33 @@ export default function DashboardSideNav({
               Recent Chats
             </h3>
             <ul className="flex flex-col gap-2 w-full pl-2">
-              {chats.map((chat, i) => {
+              {recentChats?.map((chat) => {
                 return (
-                  <li key={i + chat.href}>
+                  <li key={chat.id}>
                     <Link
-                      href={chat.href}
+                      href={`/dashboard/chat/${chat.id}`}
                       className={cn(
                         buttonVariants({
                           variant: "ghost",
                           size: "lg",
                           className:
-                            "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100",
-                        })
+                            "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 truncate",
+                        }),
+                        {
+                          "bg-orange-100":
+                            pathname === `/dashboard/chat/${chat.id}`,
+                        }
                       )}
                     >
-                      {chat.name}
+                      <div className="relative size-8">
+                        <Image
+                          src={chat.chatImage}
+                          alt={chat.chatName + "image"}
+                          fill
+                          className="rounded-full"
+                        />
+                      </div>
+                      {chat.chatName}
                     </Link>
                   </li>
                 );
@@ -137,6 +146,7 @@ export default function DashboardSideNav({
                           "justify-between":
                             link.href === "/dashboard/friend-requests" &&
                             friendRequests?.length !== 0,
+                          "bg-orange-100": pathname === link.href,
                         }
                       )}
                     >

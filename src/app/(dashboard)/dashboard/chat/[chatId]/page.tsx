@@ -3,6 +3,7 @@
 import Messages from "@/components/Messages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { setRecentChat, updateUserChats } from "@/helpers/firestore";
 import { auth, db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
 import {
@@ -12,17 +13,24 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
-import { ArrowLeft, ChevronDownIcon, Loader2Icon } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDownIcon,
+  Clock2Icon,
+  Loader2Icon,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import {
-  useCollectionData,
+  useCollection,
   useDocumentDataOnce,
 } from "react-firebase-hooks/firestore";
 
@@ -33,8 +41,8 @@ type ChatPageProps = {
 };
 
 export default function ChatPage({ params }: ChatPageProps) {
-  const { chatId } = params;
   const router = useRouter();
+  const { chatId } = params;
   const [user] = useAuthState(auth);
   const ids = chatId.split("--");
   const friendId = ids[0] === user?.uid ? ids[1] : ids[0];
@@ -42,37 +50,109 @@ export default function ChatPage({ params }: ChatPageProps) {
     doc(db, `users/${friendId}`) as DocumentReference<User, DocumentData>
   );
 
-  const [messages, loading, error] = useCollectionData<Message>(
+  const [serverMessages, loading, error] = useCollection(
     query(
       collection(db, `chat:${chatId}:messages`),
       orderBy("timestamp", "desc")
-    ) as Query<Message, DocumentData>
+    ) as Query<Omit<Message, "messageId">, DocumentData>
   );
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [tempMessage, setTempMessage] =
+    useState<Omit<Message, "messageId" | "timestamp">>();
+  const [sendLoading, setSendLoading] = useState<boolean>(false);
 
   const [isScrollButton, setIsScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (serverMessages) {
+      const mssgs: Message[] = [];
+      serverMessages.forEach((mssg) =>
+        mssgs.push({ messageId: mssg.id, ...mssg.data() })
+      );
+
+      setLocalMessages(mssgs);
+    }
+  }, [serverMessages]);
+
+  // checks for existing chats in both users
+  // if it doesn't exist
+  // sets chats for both users
+  useEffect(() => {
+    async function setUserChats() {
+      try {
+        const userChat = await getDoc(
+          doc(db, `user:${user?.uid}:chats/${chatId}`)
+        );
+        const friendChat = await getDoc(
+          doc(db, `user:${friend?.id}:chats/${chatId}`)
+        );
+
+        if (!userChat.exists() && friend) {
+          await setDoc(doc(db, `user:${user?.uid}:chats/${chatId}`), {
+            id: chatId,
+            chatName: friend?.displayName,
+            chatImage: friend?.photoUrl,
+            lastMessage: null,
+            lastMessageUserId: null,
+            timestamp: null,
+          });
+        }
+
+        if (!friendChat.exists() && user) {
+          await setDoc(doc(db, `user:${friend?.id}:chats/${chatId}`), {
+            id: chatId,
+            chatName: user.displayName,
+            chatImage: user.photoURL,
+            lastMessage: null,
+            lastMessageUserId: null,
+            timestamp: null,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    setUserChats();
+  }, [user, friend]);
+
   async function sendMessage() {
     if (messageRef.current?.value.length !== 0 && user) {
+      setTempMessage({ message: messageRef.current!.value, userId: user.uid });
+
       try {
+        setSendLoading(true);
+        await setRecentChat(user.uid, friendId, chatId);
+
         await addDoc(collection(db, `chat:${chatId}:messages`), {
-          message: messageRef.current?.value,
+          message: messageRef.current!.value,
           userId: user?.uid,
           timestamp: serverTimestamp(),
         });
+        setTempMessage(undefined);
+
+        await updateUserChats(
+          chatId,
+          user.uid,
+          friendId,
+          messageRef.current?.value
+        );
+
         bottomRef.current?.scrollIntoView({ behavior: "instant" });
       } catch (error) {
         console.log(error);
       } finally {
+        setSendLoading(false);
         messageRef.current!.value = "";
         messageRef.current?.focus();
       }
     }
   }
 
-  function handleDivScroll() {
+  async function handleDivScroll() {
     if (scrollRef.current!.scrollTop < -100) {
       setIsScrollButton(true);
     } else {
@@ -87,19 +167,22 @@ export default function ChatPage({ params }: ChatPageProps) {
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-6 w-6" />
           </Button>
+
           <div className="relative h-10 w-10">
-            <Image
-              src={friend?.photoUrl as string}
-              alt={`${friend?.displayName} Image`}
-              fill
-              className="rounded-full"
-            />
+            {friend?.photoUrl && (
+              <Image
+                src={friend?.photoUrl as string}
+                alt={`${friend?.displayName} Image`}
+                fill
+                className="rounded-full"
+              />
+            )}
           </div>
+
           <div className="flex flex-col">
             <h2 className="text-xl font-bold transition-all">
               {friend?.displayName}
             </h2>
-            {/* <p className="text-muted-foreground hidden">online</p> */}
           </div>
         </div>
       </div>
@@ -112,11 +195,28 @@ export default function ChatPage({ params }: ChatPageProps) {
           onScroll={() => handleDivScroll()}
         >
           <div ref={bottomRef} />
+
+          {/* temporary message */}
+          {tempMessage && (
+            <div className="flex w-full justify-end">
+              <div className="rounded-md p-3 max-w-[90%] break-words bg-orange-200">
+                <p className="w-full whitespace-pre-wrap">
+                  {tempMessage.message}
+                </p>
+                {sendLoading && (
+                  <div className="flex justify-end w-full text-muted-foreground">
+                    <Clock2Icon className="size-2" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {loading ? (
-            <Loader2Icon className="h-8 w-8" />
+            <Loader2Icon className="size-8 text-orange-500 animate-spin" />
           ) : (
             <Messages
-              messages={messages}
+              messages={localMessages}
               userId={user?.uid}
               friendId={friendId}
             />
@@ -127,13 +227,13 @@ export default function ChatPage({ params }: ChatPageProps) {
           variant="default"
           size="icon"
           className={cn(
-            "absolute bottom-4 right-10 rounded-full transition-transform",
+            "absolute bottom-2 right-4 md:right-6 rounded-full transition-transform",
             {
               "scale-0": !isScrollButton,
             }
           )}
           onClick={() =>
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+            bottomRef.current?.scrollIntoView({ behavior: "instant" })
           }
         >
           <ChevronDownIcon className="h-5 w-5" />
@@ -150,7 +250,16 @@ export default function ChatPage({ params }: ChatPageProps) {
             }
           }}
         />
-        <Button onClick={() => sendMessage()}>Send</Button>
+
+        <Button
+          onClick={() => sendMessage()}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+        >
+          Send
+        </Button>
       </div>
     </div>
   );

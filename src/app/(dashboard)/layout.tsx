@@ -3,9 +3,17 @@
 import DashboardSideNav from "@/components/DashboardSideNav";
 import MobileNav from "@/components/MobileNav";
 import { auth, db } from "@/lib/firebase";
-import { collection } from "firebase/firestore";
+import {
+  CollectionReference,
+  DocumentData,
+  Query,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
@@ -18,7 +26,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [friendRequests, reqLoading, reqError] = useCollectionData(
     collection(db, `user:${user?.uid}:incoming-friend-requests`)
   );
+  const [recentChatIds] = useCollectionData(
+    collection(db, `user:${user?.uid}:recent-chats`) as CollectionReference<
+      { id: string },
+      DocumentData
+    >
+  );
+  const [recentChats, setRecentChats] = useState<Chat[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    async function getRecentChats() {
+      if (recentChatIds?.length !== 0 || recentChatIds === undefined) {
+        const chatIdArray: string[] = [];
+        recentChatIds?.forEach(({ id }) => chatIdArray.push(id));
+
+        try {
+          const result = await getDocs(
+            query(
+              collection(db, `user:${user?.uid}:chats`),
+              where("id", "in", chatIdArray)
+            ) as Query<Chat, DocumentData>
+          );
+
+          const chats: Chat[] = [];
+          result.forEach((chat) => chats.push(chat.data()));
+          setRecentChats(chats);
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        setRecentChats([]);
+      }
+    }
+
+    getRecentChats();
+  }, [recentChatIds]);
 
   useEffect(() => {
     if (!user) {
@@ -28,8 +71,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="w-full h-[100dvh] flex flex-col lg:flex-row">
-      <DashboardSideNav user={user} friendRequests={friendRequests} />
-      <MobileNav user={user} friendRequests={friendRequests} />
+      <DashboardSideNav
+        user={user}
+        recentChats={recentChats}
+        friendRequests={friendRequests}
+      />
+      <MobileNav
+        user={user}
+        recentChats={recentChats}
+        friendRequests={friendRequests}
+      />
       <div className="flex-1 w-full overflow-y-auto">{children}</div>
     </div>
   );

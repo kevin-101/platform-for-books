@@ -1,12 +1,14 @@
 "use client";
 
 import { Button } from "./ui/button";
-import { EllipsisVerticalIcon } from "lucide-react";
-import { useCollectionDataOnce } from "react-firebase-hooks/firestore";
+import { EllipsisVerticalIcon, MessageCircleIcon } from "lucide-react";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 import {
   DocumentData,
   Query,
   collection,
+  deleteDoc,
+  doc,
   getDocs,
   query,
   where,
@@ -26,42 +28,60 @@ import {
 import Link from "next/link";
 import { formatChatId } from "@/lib/utils";
 import { User as AuthUser } from "firebase/auth";
+import { toast } from "sonner";
 
 type FriendsListProps = {};
 
 type FriendsListActionsProps = {
   friend: User;
   user: AuthUser | null | undefined;
+  removeFn: () => void;
 };
 
 export default function FriendsList({}: FriendsListProps) {
   const [user] = useAuthState(auth);
-  const [value, loading, error] = useCollectionDataOnce(
+  const [value, loading, error] = useCollectionData(
     collection(db, `user:${user?.uid}:friends`)
   );
   const [friends, setFriends] = useState<User[]>([]);
 
   useEffect(() => {
     async function getFriends() {
-      if (value) {
+      if (value?.length !== 0 || value === undefined) {
         const friendIds: string[] = [];
         value?.forEach((friend) => friendIds.push(friend.id));
 
-        const friendsSnapshot = await getDocs(
-          query(collection(db, "users"), where("id", "in", friendIds)) as Query<
-            User,
-            DocumentData
-          >
-        );
+        try {
+          const friendsSnapshot = await getDocs(
+            query(
+              collection(db, "users"),
+              where("id", "in", friendIds)
+            ) as Query<User, DocumentData>
+          );
 
-        const frnds: User[] = [];
-        friendsSnapshot.forEach((frnd) => frnds.push(frnd.data()));
-        setFriends(frnds);
+          const frnds: User[] = [];
+          friendsSnapshot.forEach((frnd) => frnds.push(frnd.data()));
+          setFriends(frnds);
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        setFriends([]);
       }
     }
 
     getFriends();
   }, [value]);
+
+  async function removeFriend(friendId: string) {
+    try {
+      await deleteDoc(doc(db, `user:${user?.uid}:friends/${friendId}`));
+      toast.success("Friend removed");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Try again");
+    }
+  }
 
   if (error) {
     return <ErrorComp />;
@@ -80,7 +100,13 @@ export default function FriendsList({}: FriendsListProps) {
           <UserListItem
             key={friend.id}
             user={friend}
-            actions={<FriendsListActions friend={friend} user={user} />}
+            actions={
+              <FriendsListActions
+                friend={friend}
+                user={user}
+                removeFn={() => removeFriend(friend.id)}
+              />
+            }
           />
         );
       })}
@@ -88,28 +114,34 @@ export default function FriendsList({}: FriendsListProps) {
   );
 }
 
-function FriendsListActions({ friend, user }: FriendsListActionsProps) {
+function FriendsListActions({
+  friend,
+  user,
+  removeFn,
+}: FriendsListActionsProps) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <EllipsisVerticalIcon className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
+    <div className="flex gap-4 items-center">
+      <Button asChild size="icon">
+        <Link href={`/dashboard/chat/${formatChatId([friend.id, user?.uid])}`}>
+          <MessageCircleIcon className="size-5" />
+        </Link>
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon">
+            <EllipsisVerticalIcon className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="font-medium">
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/user/${friend.id}`}>Profile</Link>
+          </DropdownMenuItem>
 
-      <DropdownMenuContent align="end" className="font-medium">
-        <DropdownMenuItem asChild>
-          <Link href={`/dashboard/user/${friend.id}`}>Profile</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link
-            href={`/dashboard/chat/${formatChatId([friend.id, user!.uid])}`}
-          >
-            Chat
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>Remove friend</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem onClick={() => removeFn()}>
+            Remove friend
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

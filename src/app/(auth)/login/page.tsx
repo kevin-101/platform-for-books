@@ -1,19 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useAuthState, useSignInWithGoogle } from "react-firebase-hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import {
-  GoogleAuthProvider,
-  User,
-  UserCredential,
-  getRedirectResult,
-} from "firebase/auth";
+import { GoogleAuthProvider, getRedirectResult } from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useSignInWithRedirect } from "@/hooks/use-signin-with-redirect";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function Page() {
   const [user, __, ___] = useAuthState(auth);
@@ -23,47 +19,52 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
+    // this function takes care of the logic when
+    // the signin redirects back to this page
     async function handleRedirect() {
-      setRedirectLoading(true);
+      if (user) {
+        setRedirectLoading(true);
 
-      try {
-        const result = await getRedirectResult(auth);
-        const userId = result?.user.uid as string;
-        const user = await getDoc(doc(db, "users", userId));
+        try {
+          const result = await getRedirectResult(auth);
+          const userId = result?.user.uid as string;
+          const user = await getDoc(doc(db, "users", userId));
 
-        // check if user already doesn't exist
-        if (!user.exists()) {
-          try {
-            await setDoc(doc(db, "users", userId), {
-              id: userId,
-              displayName: result?.user.displayName,
-              email: result?.user.email,
-              photoUrl: result?.user.photoURL,
-            });
-            router.push("/dashboard");
-          } catch (error) {
-            console.log(error);
-          } finally {
-            setRedirectLoading(false);
-            return;
+          // check if user already doesn't exist
+          if (!user.exists()) {
+            try {
+              await setDoc(doc(db, "users", userId), {
+                id: userId,
+                displayName: result?.user.displayName,
+                email: result?.user.email,
+                photoUrl: result?.user.photoURL,
+              });
+              router.push("/dashboard");
+            } catch (error) {
+              console.log(error);
+            } finally {
+              setRedirectLoading(false);
+              return;
+            }
           }
+          setRedirectLoading(false);
+          router.push("/dashboard");
+        } catch (error) {
+          toast.error(`Something went wrong. Please try again`);
+          console.log(error);
+        } finally {
+          setRedirectLoading(false);
         }
-        setRedirectLoading(false);
-        router.push("/dashboard");
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setRedirectLoading(false);
       }
     }
 
-    if (user) {
-      handleRedirect();
-    }
+    handleRedirect();
   }, [user]);
 
   async function signIn() {
     try {
+      // this works properly only if you specify the rewrites in next.cofig.mjs
+      // as per the best practices in the firebase docs
       signInWithGoogle();
     } catch (error) {
       console.log(error);

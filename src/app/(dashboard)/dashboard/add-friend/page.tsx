@@ -82,7 +82,9 @@ export default function AddFriendPage() {
 
       <div className="flex flex-col w-full gap-2 items-center">
         {matchingUsers.length === 0 ? (
-          <h1 className="text-3xl font-bold">No Matching Users Found</h1>
+          <h1 className="text-xl font-bold text-center">
+            No Matching Users Found
+          </h1>
         ) : (
           <ul className="flex flex-col w-full gap-2">
             {matchingUsers.map((user, _) => {

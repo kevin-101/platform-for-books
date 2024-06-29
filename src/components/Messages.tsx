@@ -16,7 +16,7 @@ export default function Messages({
       {messages?.map((message) => {
         return (
           <div
-            key={message.timestamp?.toString()}
+            key={message.messageId}
             className={cn("flex w-full", {
               "justify-end": message.userId === userId,
               "justify-start": message.userId === friendId,
@@ -29,6 +29,13 @@ export default function Messages({
               })}
             >
               <p className="w-full whitespace-pre-wrap">{message.message}</p>
+              {message.timestamp && (
+                <p className="flex justify-end w-full text-muted-foreground text-xs">
+                  {message.timestamp
+                    .toDate()
+                    .toLocaleTimeString("en-US", { timeStyle: "short" })}
+                </p>
+              )}
             </div>
           </div>
         );

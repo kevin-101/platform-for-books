@@ -2,9 +2,6 @@ import {
   Auth,
   AuthError,
   AuthProvider,
-  User,
-  UserCredential,
-  getRedirectResult,
   signInWithRedirect,
 } from "firebase/auth";
 import { useCallback, useState } from "react";
