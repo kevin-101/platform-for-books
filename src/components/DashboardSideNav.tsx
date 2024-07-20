@@ -18,14 +18,13 @@ import { useSignOut } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import Image from "next/image";
 import { User } from "firebase/auth";
-import { DocumentData } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 
 type DashboardSideNavProps = {
   className?: ClassValue;
   user: User | null | undefined;
   recentChats: Chat[] | undefined;
-  friendRequests: DocumentData[] | undefined;
+  friendRequests: string[] | undefined;
 };
 
 export type LinkType = {
@@ -36,7 +35,7 @@ export type LinkType = {
 
 export const navLinks: LinkType[] = [
   {
-    href: "/dashboard/search-books",
+    href: "/dashboard/search",
     icon: BookIcon,
     name: "Search Books",
   },
@@ -68,7 +67,7 @@ export default function DashboardSideNav({
   recentChats,
   friendRequests,
 }: DashboardSideNavProps) {
-  const [signOut, signOutLoading, signOutError] = useSignOut(auth);
+  const [signOut, signOutLoading] = useSignOut(auth);
   const pathname = usePathname();
 
   return (
@@ -145,7 +144,7 @@ export default function DashboardSideNav({
                         {
                           "justify-between":
                             link.href === "/dashboard/friend-requests" &&
-                            friendRequests?.length !== 0,
+                            friendRequests?.length,
                           "bg-orange-100": pathname === link.href,
                         }
                       )}
@@ -157,7 +156,8 @@ export default function DashboardSideNav({
                         {link.name}
                       </div>
                       {link.href === "/dashboard/friend-requests" &&
-                        friendRequests?.length !== 0 && (
+                        friendRequests &&
+                        friendRequests.length > 0 && (
                           <span className="flex items-center justify-center bg-red-600 rounded-full p-2 w-6 h-6 text-sm">
                             {friendRequests?.length}
                           </span>
@@ -174,12 +174,14 @@ export default function DashboardSideNav({
       <div className="flex gap-2 items-center justify-between py-4 w-full">
         <div className="flex gap-4 items-center">
           <div className="relative h-12 w-12">
-            <Image
-              src={user?.photoURL as string}
-              alt={user?.displayName as string}
-              fill
-              className="rounded-full"
-            />
+            {user?.photoURL && (
+              <Image
+                src={user?.photoURL as string}
+                alt={user?.displayName as string}
+                fill
+                className="rounded-full"
+              />
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-bold">{user?.displayName}</h2>

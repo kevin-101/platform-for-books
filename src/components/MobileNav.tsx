@@ -23,14 +23,13 @@ import Image from "next/image";
 import { useSignOut } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
-import { DocumentData } from "firebase/firestore";
 import { useParams, usePathname } from "next/navigation";
 
 type MobileNavProps = {
   className?: ClassValue;
   user: User | null | undefined;
   recentChats: Chat[] | undefined;
-  friendRequests: DocumentData[] | undefined;
+  friendRequests: string[] | undefined;
 };
 
 const mobileNavLinks: LinkType[] = [
@@ -57,7 +56,7 @@ export default function MobileNav({
   recentChats,
   friendRequests,
 }: MobileNavProps) {
-  const [signOut, loading, error] = useSignOut(auth);
+  const [signOut, loading] = useSignOut(auth);
   const pathname = usePathname();
   const { chatId } = useParams<{ chatId: string }>();
 
@@ -76,7 +75,7 @@ export default function MobileNav({
           <Button variant="ghost" size="sm">
             <div className="relative">
               <MenuIcon className="h-5 w-5" />
-              {friendRequests?.length !== 0 && (
+              {friendRequests && friendRequests.length > 0 && (
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-600 rounded-full" />
               )}
             </div>
@@ -152,7 +151,7 @@ export default function MobileNav({
                               {
                                 "justify-between":
                                   link.href === "/dashboard/friend-requests" &&
-                                  friendRequests?.length !== 0,
+                                  friendRequests?.length,
                                 "bg-orange-100": pathname === link.href,
                               }
                             )}
@@ -164,7 +163,8 @@ export default function MobileNav({
                               {link.name}
                             </div>
                             {link.href === "/dashboard/friend-requests" &&
-                              friendRequests?.length !== 0 && (
+                              friendRequests &&
+                              friendRequests.length > 0 && (
                                 <span className="flex items-center justify-center bg-red-600 rounded-full p-2 w-6 h-6 text-sm">
                                   {friendRequests?.length}
                                 </span>
@@ -182,12 +182,14 @@ export default function MobileNav({
           <div className="flex gap-2 items-center justify-between py-4 w-full">
             <div className="flex gap-2 md:gap-4 items-center w-3/4">
               <div className="relative size-12 flex-shrink-0">
-                <Image
-                  src={user?.photoURL as string}
-                  alt={user?.displayName as string}
-                  fill
-                  className="rounded-full"
-                />
+                {user?.photoURL && (
+                  <Image
+                    src={user?.photoURL as string}
+                    alt={user?.displayName as string}
+                    fill
+                    className="rounded-full"
+                  />
+                )}
               </div>
 
               <div className="flex flex-col gap-1 flex-1 truncate">

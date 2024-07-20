@@ -2,15 +2,17 @@
 
 import { Button } from "./ui/button";
 import { EllipsisVerticalIcon, MessageCircleIcon } from "lucide-react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import {
   DocumentData,
+  DocumentReference,
   Query,
+  arrayRemove,
   collection,
-  deleteDoc,
   doc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
@@ -40,22 +42,22 @@ type FriendsListActionsProps = {
 
 export default function FriendsList({}: FriendsListProps) {
   const [user] = useAuthState(auth);
-  const [value, loading, error] = useCollectionData(
-    collection(db, `user:${user?.uid}:friends`)
+  const [friendIds, loading, error] = useDocumentData(
+    doc(db, `friends/${user?.uid}`) as DocumentReference<
+      { ids: string[] },
+      DocumentData
+    >
   );
   const [friends, setFriends] = useState<User[]>([]);
 
   useEffect(() => {
     async function getFriends() {
-      if (value?.length !== 0 || value === undefined) {
-        const friendIds: string[] = [];
-        value?.forEach((friend) => friendIds.push(friend.id));
-
+      if (friendIds && friendIds.ids.length > 0) {
         try {
           const friendsSnapshot = await getDocs(
             query(
               collection(db, "users"),
-              where("id", "in", friendIds)
+              where("id", "in", friendIds.ids)
             ) as Query<User, DocumentData>
           );
 
@@ -71,19 +73,25 @@ export default function FriendsList({}: FriendsListProps) {
     }
 
     getFriends();
-  }, [value]);
+  }, [friendIds]);
 
   async function removeFriend(friendId: string) {
-    try {
-      await deleteDoc(doc(db, `user:${user?.uid}:friends/${friendId}`));
-      toast.success("Friend removed");
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong. Try again");
+    if (user) {
+      try {
+        await updateDoc(doc(db, `friends/${user.uid}`), {
+          ids: arrayRemove(friendId),
+        });
+        toast.success("Friend removed");
+      } catch (error) {
+        console.log(error);
+        toast.error("Something went wrong. Try again");
+      }
     }
   }
 
   if (error) {
+    console.log(error);
+
     return <ErrorComp />;
   }
 

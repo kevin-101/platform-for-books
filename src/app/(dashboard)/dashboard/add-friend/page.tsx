@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth, db } from "@/lib/firebase";
 import {
+  arrayUnion,
   collection,
   doc,
   getDocs,
@@ -48,18 +49,9 @@ export default function AddFriendPage() {
     try {
       setReqsendLoading(true);
       const requestingUserId = user?.uid as string;
-      await setDoc(
-        doc(
-          db,
-          `user:${requestedUser.id}:incoming-friend-requests/${requestingUserId}`
-        ),
-        {
-          id: requestingUserId,
-          displayName: user?.displayName,
-          email: user?.email,
-          photoUrl: user?.photoURL,
-        }
-      );
+      await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
+        ids: arrayUnion(requestingUserId),
+      });
       toast.success("Friend Request Sent");
     } catch (error) {
       console.error(error);

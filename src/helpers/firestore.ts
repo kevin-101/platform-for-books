@@ -1,11 +1,11 @@
 import { db } from "@/lib/firebase";
 import {
-  collection,
-  deleteDoc,
+  arrayRemove,
+  arrayUnion,
   doc,
-  getDocs,
-  orderBy,
-  query,
+  DocumentData,
+  DocumentReference,
+  getDoc,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -17,44 +17,46 @@ export async function setRecentChat(
   chatId: string
 ) {
   try {
-    const userQuery = query(
-      collection(db, `user:${userId}:recent-chats`),
-      orderBy("timestamp", "desc")
-    );
-    const friendQuery = query(
-      collection(db, `user:${friendId}:recent-chats`),
-      orderBy("timestamp", "desc")
-    );
+    const userRecentChatRef = doc(
+      db,
+      `recent-chats/${userId}`
+    ) as DocumentReference<{ ids: string[] }, DocumentData>;
+    const friendRecentChatRef = doc(
+      db,
+      `recent-chats/${friendId}`
+    ) as DocumentReference<{ ids: string[] }, DocumentData>;
 
-    const userResult = await getDocs(userQuery);
-    const userRecentChats = userResult.docs;
+    const userResult = await getDoc(userRecentChatRef);
+    const userRecentChats = userResult.data();
+    const userRecentChatsLength = userRecentChats?.ids.length as number;
 
-    const friendResult = await getDocs(userQuery);
-    const friendRecentChats = friendResult.docs;
+    const friendResult = await getDoc(friendRecentChatRef);
+    const friendRecentChats = friendResult.data();
+    const friendRecentChatsLength = friendRecentChats?.ids.length as number;
 
-    if (userRecentChats.length >= 3 && friendRecentChats.length >= 3) {
+    if (userRecentChatsLength >= 3 && friendRecentChatsLength >= 3) {
       // delete and add for user
-      await deleteDoc(
-        doc(db, `user:${userId}:recent-chats/${userResult.docs[2].id}`)
-      );
-      await setDoc(doc(db, `user:${userId}:recent-chats/${chatId}`), {
-        id: chatId,
+      await updateDoc(doc(db, `recent-chats/${userId}`), {
+        ids: arrayRemove(userRecentChats?.ids[userRecentChatsLength - 1]),
+      });
+      await updateDoc(doc(db, `recent-chats/${userId}`), {
+        ids: arrayUnion(chatId),
       });
 
       // delete and add for friend
-      await deleteDoc(
-        doc(db, `user:${friendId}:recent-chats/${friendResult.docs[2].id}`)
-      );
-      await setDoc(doc(db, `user:${friendId}:recent-chats/${chatId}`), {
-        id: chatId,
+      await updateDoc(doc(db, `recent-chats/${friendId}`), {
+        ids: arrayRemove(friendRecentChats?.ids[friendRecentChatsLength - 1]),
+      });
+      await updateDoc(doc(db, `recent-chats/${friendId}`), {
+        ids: arrayUnion(chatId),
       });
     } else {
       // add for user and friend
-      await setDoc(doc(db, `user:${userId}:recent-chats/${chatId}`), {
-        id: chatId,
+      await setDoc(doc(db, `recent-chats/${userId}`), {
+        ids: arrayUnion(chatId),
       });
-      await setDoc(doc(db, `user:${friendId}:recent-chats/${chatId}`), {
-        id: chatId,
+      await setDoc(doc(db, `recent-chats/${friendId}`), {
+        ids: arrayUnion(chatId),
       });
     }
   } catch (error) {
@@ -69,13 +71,13 @@ export async function updateUserChats(
   lastMessage: string | undefined
 ) {
   try {
-    await updateDoc(doc(db, `user:${userId}:chats/${chatId}`), {
+    await updateDoc(doc(db, `chats/${userId}/chat-details/${chatId}`), {
       lastMessage: lastMessage,
       lastMessageUserId: userId,
       timestamp: serverTimestamp(),
     });
 
-    await updateDoc(doc(db, `user:${friendId}:chats/${chatId}`), {
+    await updateDoc(doc(db, `chats/${friendId}/chat-details/${chatId}`), {
       lastMessage: lastMessage,
       lastMessageUserId: userId,
       timestamp: serverTimestamp(),

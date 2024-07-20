@@ -46,13 +46,13 @@ export default function ChatPage({ params }: ChatPageProps) {
   const [user] = useAuthState(auth);
   const ids = chatId.split("--");
   const friendId = ids[0] === user?.uid ? ids[1] : ids[0];
-  const [friend] = useDocumentDataOnce<User>(
+  const [friend] = useDocumentDataOnce(
     doc(db, `users/${friendId}`) as DocumentReference<User, DocumentData>
   );
 
   const [serverMessages, loading, error] = useCollection(
     query(
-      collection(db, `chat:${chatId}:messages`),
+      collection(db, `messages/${chatId}/message-details`),
       orderBy("timestamp", "desc")
     ) as Query<Omit<Message, "messageId">, DocumentData>
   );
@@ -83,33 +83,35 @@ export default function ChatPage({ params }: ChatPageProps) {
   useEffect(() => {
     async function setUserChats() {
       try {
-        const userChat = await getDoc(
-          doc(db, `user:${user?.uid}:chats/${chatId}`)
-        );
-        const friendChat = await getDoc(
-          doc(db, `user:${friend?.id}:chats/${chatId}`)
-        );
+        if (user && friend) {
+          const userChat = await getDoc(
+            doc(db, `chats/${user.uid}/chat-details/${chatId}`)
+          );
+          const friendChat = await getDoc(
+            doc(db, `chats/${friend.id}/chat-details/${chatId}`)
+          );
 
-        if (!userChat.exists() && friend) {
-          await setDoc(doc(db, `user:${user?.uid}:chats/${chatId}`), {
-            id: chatId,
-            chatName: friend?.displayName,
-            chatImage: friend?.photoUrl,
-            lastMessage: null,
-            lastMessageUserId: null,
-            timestamp: null,
-          });
-        }
+          if (!userChat.exists()) {
+            await setDoc(doc(db, `chats/${user.uid}/chat-details/${chatId}`), {
+              id: chatId,
+              chatName: friend.displayName,
+              chatImage: friend.photoUrl,
+              lastMessage: null,
+              lastMessageUserId: null,
+              timestamp: null,
+            });
+          }
 
-        if (!friendChat.exists() && user) {
-          await setDoc(doc(db, `user:${friend?.id}:chats/${chatId}`), {
-            id: chatId,
-            chatName: user.displayName,
-            chatImage: user.photoURL,
-            lastMessage: null,
-            lastMessageUserId: null,
-            timestamp: null,
-          });
+          if (!friendChat.exists()) {
+            await setDoc(doc(db, `chats/${friend.id}/chat-details/${chatId}`), {
+              id: chatId,
+              chatName: user.displayName,
+              chatImage: user.photoURL,
+              lastMessage: null,
+              lastMessageUserId: null,
+              timestamp: null,
+            });
+          }
         }
       } catch (error) {
         console.log(error);
@@ -120,20 +122,21 @@ export default function ChatPage({ params }: ChatPageProps) {
   }, [user, friend]);
 
   async function sendMessage() {
+    // message field should not be empty and user has to be logged in
     if (messageRef.current?.value.length !== 0 && user) {
       setTempMessage({ message: messageRef.current!.value, userId: user.uid });
 
       try {
         setSendLoading(true);
-        await setRecentChat(user.uid, friendId, chatId);
 
-        await addDoc(collection(db, `chat:${chatId}:messages`), {
+        await addDoc(collection(db, `messages/${chatId}/message-details`), {
           message: messageRef.current!.value,
           userId: user?.uid,
           timestamp: serverTimestamp(),
         });
         setTempMessage(undefined);
 
+        await setRecentChat(user.uid, friendId, chatId);
         await updateUserChats(
           chatId,
           user.uid,

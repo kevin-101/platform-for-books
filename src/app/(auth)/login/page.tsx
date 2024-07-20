@@ -12,9 +12,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function Page() {
-  const [user, __, ___] = useAuthState(auth);
-  const provider = new GoogleAuthProvider();
-  const [signInWithGoogle, loading, _] = useSignInWithRedirect(auth, provider);
+  const [user] = useAuthState(auth);
+  const googleProvider = new GoogleAuthProvider();
+  const [signInWithGoogle, loading] = useSignInWithRedirect(
+    auth,
+    googleProvider
+  );
   const [redirectLoading, setRedirectLoading] = useState<boolean>(false);
   const router = useRouter();
 
@@ -28,25 +31,18 @@ export default function Page() {
         try {
           const result = await getRedirectResult(auth);
           const userId = result?.user.uid as string;
-          const user = await getDoc(doc(db, "users", userId));
+          const dbUser = await getDoc(doc(db, "users", userId));
 
-          // check if user already doesn't exist
-          if (!user.exists()) {
-            try {
-              await setDoc(doc(db, "users", userId), {
-                id: userId,
-                displayName: result?.user.displayName,
-                email: result?.user.email,
-                photoUrl: result?.user.photoURL,
-              });
-              router.push("/dashboard");
-            } catch (error) {
-              console.log(error);
-            } finally {
-              setRedirectLoading(false);
-              return;
-            }
+          // check if user doesn't exist
+          if (!dbUser.exists()) {
+            await setDoc(doc(db, "users", userId), {
+              id: userId,
+              displayName: result?.user.displayName,
+              email: result?.user.email,
+              photoUrl: result?.user.photoURL,
+            });
           }
+
           setRedirectLoading(false);
           router.push("/dashboard");
         } catch (error) {

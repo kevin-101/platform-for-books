@@ -5,20 +5,56 @@ import FriendRequests from "@/components/FriendRequests";
 import LoadingComp from "@/components/LoadingComp";
 import { auth, db } from "@/lib/firebase";
 import {
-  CollectionReference,
   DocumentData,
+  DocumentReference,
+  Query,
   collection,
+  doc,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 
 export default function FriendRequestsPage() {
   const [user] = useAuthState(auth);
-  const reqRef = collection(
+  const reqRef = doc(
     db,
-    `user:${user?.uid}:incoming-friend-requests`
-  ) as CollectionReference<User, DocumentData>;
-  const [friendRequests, loading, error] = useCollectionData<User>(reqRef);
+    `incoming-friend-requests/${user?.uid}`
+  ) as DocumentReference<{ ids: string[] }, DocumentData>;
+  const [friendRequestsIds, loading, error] = useDocumentData(reqRef);
+  const [friendRequests, setFriendRequests] = useState<User[] | undefined>([]);
+
+  useEffect(() => {
+    async function getRequests() {
+      if (friendRequestsIds && friendRequestsIds.ids.length > 0) {
+        try {
+          const reqSnapshot = await getDocs(
+            query(
+              collection(db, `users`),
+              where("id", "in", friendRequestsIds.ids)
+            ) as Query<User, DocumentData>
+          );
+
+          const frndReqs: User[] = [];
+
+          reqSnapshot.forEach((req) => {
+            frndReqs.push(req.data());
+          });
+
+          setFriendRequests(frndReqs);
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        setFriendRequests([]);
+      }
+    }
+
+    getRequests();
+  }, [friendRequestsIds]);
 
   if (error) {
     return <ErrorComp />;

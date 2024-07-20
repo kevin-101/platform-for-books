@@ -1,9 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import { User as AuthUser } from "firebase/auth";
@@ -32,9 +37,9 @@ export default function FriendRequests({
   async function denyRequest(idToDelete: string) {
     try {
       setDenyLoading(true);
-      await deleteDoc(
-        doc(db, `user:${user?.uid}:incoming-friend-requests/${idToDelete}`)
-      );
+      await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
+        ids: arrayRemove(idToDelete),
+      });
       toast.success("Friend request denied");
     } catch (error) {
       console.error(error);
@@ -44,23 +49,20 @@ export default function FriendRequests({
     }
   }
 
-  async function acceptRequest(friend: User) {
+  async function acceptRequest(friendId: string) {
     try {
       setAcceptLoading(true);
 
-      // add friends and delete incoming request mutually
-      await setDoc(doc(db, `user:${user?.uid}:friends/${friend.id}`), {
-        id: friend.id,
+      // add friends mutually and delete incoming request
+      await setDoc(doc(db, `friends/${user?.uid}`), {
+        ids: arrayUnion(friendId),
       });
-      await setDoc(doc(db, `user:${friend.id}:friends/${user?.uid}`), {
-        id: user?.uid,
+      await setDoc(doc(db, `friends/${friendId}`), {
+        ids: arrayUnion(user?.uid),
       });
-      await deleteDoc(
-        doc(db, `user:${user?.uid}:incoming-friend-requests/${friend.id}`)
-      );
-      await deleteDoc(
-        doc(db, `user:${friend.id}:incoming-friend-requests/${user?.uid}`)
-      );
+      await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
+        ids: arrayRemove(friendId),
+      });
 
       toast.success("Friend added");
     } catch (error) {
@@ -81,7 +83,7 @@ export default function FriendRequests({
             actions={
               <ReqActions
                 denyRequest={() => denyRequest(request.id)}
-                acceptRequest={() => acceptRequest(request)}
+                acceptRequest={() => acceptRequest(request.id)}
                 denyLoading={denyLoading}
                 acceptLoading={acceptLoading}
               />
