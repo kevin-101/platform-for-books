@@ -20,3 +20,10 @@ type Chat = {
   lastMessageUserId: string | null;
   timestamp: import("firebase/firestore").Timestamp;
 };
+
+type SharedBook = {
+  bookDocId: string;
+  bookId: string;
+  bookName: string;
+  bookImageUrl: string;
+};

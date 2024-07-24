@@ -3,9 +3,9 @@
 import { ClassValue } from "clsx";
 import { LinkType, navLinks } from "./DashboardSideNav";
 import {
+  EllipsisVerticalIcon,
   HomeIcon,
   Loader2,
-  LogOut,
   MenuIcon,
   MessageCircle,
   SearchIcon,
@@ -24,6 +24,12 @@ import { useSignOut } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import { User } from "firebase/auth";
 import { useParams, usePathname } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 type MobileNavProps = {
   className?: ClassValue;
@@ -200,17 +206,29 @@ export default function MobileNav({
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              className="flex-shrink-0"
-              onClick={() => signOut()}
-            >
-              {loading ? (
-                <Loader2 className="size-5 animate-spin" />
-              ) : (
-                <LogOut className="size-5" />
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="h-full">
+                <Button variant="ghost" className="h-full">
+                  <EllipsisVerticalIcon className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[9999]">
+                <SheetClose asChild>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/profile">Profile</Link>
+                  </DropdownMenuItem>
+                </SheetClose>
+                <SheetClose asChild>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      "Logout"
+                    )}
+                  </DropdownMenuItem>
+                </SheetClose>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </SheetContent>
       </Sheet>

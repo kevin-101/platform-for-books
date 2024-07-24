@@ -2,8 +2,9 @@
 
 import {
   BookIcon,
+  EllipsisVerticalIcon,
   Loader2,
-  LogOut,
+  LogOutIcon,
   LucideIcon,
   MessageCircle,
   UserIcon,
@@ -19,6 +20,12 @@ import { auth } from "@/lib/firebase";
 import Image from "next/image";
 import { User } from "firebase/auth";
 import { usePathname } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 type DashboardSideNavProps = {
   className?: ClassValue;
@@ -189,13 +196,25 @@ export default function DashboardSideNav({
           </div>
         </div>
 
-        <Button variant="ghost" className="h-full" onClick={() => signOut()}>
-          {signOutLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <LogOut className="h-5 w-5" />
-          )}
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="h-full">
+            <Button variant="ghost" className="h-full">
+              <EllipsisVerticalIcon className="size-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut()}>
+              {signOutLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                "Logout"
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );
