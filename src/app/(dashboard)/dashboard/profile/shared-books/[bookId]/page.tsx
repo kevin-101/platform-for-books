@@ -57,46 +57,45 @@ export default function SharedBookPage({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row items-center gap-4 w-full h-full px-4 pt-4 md:pt-8">
-      <div className="flex flex-col items-center w-full gap-4">
-        <div className="relative w-full h-48 lg:h-96">
-          <Image
-            src={sharedBook?.bookImageUrl as string}
-            alt={`${sharedBook?.bookName} image`}
-            fill
-            className="object-contain"
-          />
+    <div className="w-full h-full px-4 pt-4 md:py-8">
+      <div className="flex flex-col lg:flex-row items-center w-full h-full">
+        <div className="flex flex-col items-center justify-center w-full h-auto lg:h-full gap-4 bg-muted">
+          <div className="relative w-full h-auto">
+            <img
+              src={sharedBook?.bookImageUrl as string}
+              alt={`${sharedBook?.bookName} image`}
+              className="object-contain"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col w-full gap-4">
-        <form className="space-y-1 w-full">
-          <label htmlFor={sharedBook?.bookId} className="font-medium">
-            Name
-          </label>
-          <Input
-            type="text"
-            id={sharedBook?.bookId}
-            name="bookName"
-            value={sharedBook?.bookName}
-            disabled={!isEdit}
-          />
-        </form>
-
-        <div className="flex w-full justify-end gap-4">
-          {isEdit ? (
-            <>
-              <Button variant="outline" onClick={() => setIsEdit(false)}>
-                Cancel
-              </Button>
-              <Button>Save</Button>
-            </>
-          ) : (
-            <>
-              <Button variant="destructive">Delete</Button>
-              <Button onClick={() => setIsEdit(true)}>Edit</Button>
-            </>
-          )}
+        <div className="flex flex-col w-full gap-4 px-4">
+          <form className="space-y-1 w-full">
+            <label htmlFor={sharedBook?.bookId} className="font-medium">
+              Name
+            </label>
+            <Input
+              type="text"
+              id={sharedBook?.bookId}
+              defaultValue={sharedBook?.bookName}
+              disabled={!isEdit}
+            />
+          </form>
+          <div className="flex w-full justify-end gap-4">
+            {isEdit ? (
+              <>
+                <Button variant="outline" onClick={() => setIsEdit(false)}>
+                  Cancel
+                </Button>
+                <Button>Save</Button>
+              </>
+            ) : (
+              <>
+                <Button variant="destructive">Delete</Button>
+                <Button onClick={() => setIsEdit(true)}>Edit</Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -18,7 +18,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { auth, db, storage } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
 import {
   addDoc,
   collection,
@@ -270,17 +269,12 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <div
-                  className={cn(
-                    "relative flex justify-center items-center w-full overflow-hidden bg-muted rounded-md",
-                    previewPath ? "h-auto" : "h-60"
-                  )}
-                >
+                <div className="relative flex justify-center items-center w-full h-60 overflow-hidden bg-muted rounded-md">
                   {previewPath ? (
                     <img
                       src={previewPath as string}
                       alt="Book image preview"
-                      className="object-cover rounded-md"
+                      className="object-contain rounded-md"
                     />
                   ) : (
                     <p className="text-lg font-medium text-muted-foreground">
@@ -301,10 +295,12 @@ export default function ProfilePage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
           {sharedBooks &&
             sharedBooks.map((book) => {
               return (
                 <Link
+                  key={book.bookId}
                   href={`/dashboard/profile/shared-books/${book.bookDocId}`}
                   className="group relative w-full h-32 md:h-[20vw] lg:h-[15vw] cursor-pointer"
                 >
@@ -312,7 +308,7 @@ export default function ProfilePage() {
                     src={book.bookImageUrl}
                     alt={`${book.bookName} image`}
                     fill
-                    className="object-cover group-hover:opacity-85"
+                    className="object-cover group-hover:opacity-85 transition-opacity"
                   />
                 </Link>
               );

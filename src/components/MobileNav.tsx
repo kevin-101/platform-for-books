@@ -16,6 +16,9 @@ import {
   SheetContent,
   SheetClose,
   SheetTrigger,
+  SheetDescription,
+  SheetTitle,
+  SheetHeader,
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -92,11 +95,16 @@ export default function MobileNav({
           side="left"
         >
           <div className="flex flex-col items-start justify-center gap-8 w-full">
-            <SheetClose asChild>
-              <Link href="/dashboard" className="text-3xl font-bold w-auto">
-                Dashboard
-              </Link>
-            </SheetClose>
+            <SheetHeader>
+              <SheetTitle>
+                <SheetClose asChild>
+                  <Link href="/dashboard" className="text-3xl font-bold w-auto">
+                    Dashboard
+                  </Link>
+                </SheetClose>
+              </SheetTitle>
+              <SheetDescription></SheetDescription>
+            </SheetHeader>
 
             <nav className="flex flex-col gap-12 items-start w-full">
               <div className="flex flex-col gap-4 items-start justify-center w-full">

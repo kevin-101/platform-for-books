@@ -40,22 +40,22 @@ type ChatPageProps = {
   };
 };
 
-export default function ChatPage({ params }: ChatPageProps) {
-  const router = useRouter();
-  const { chatId } = params;
+export default function ChatPage({ params: { chatId } }: ChatPageProps) {
   const [user] = useAuthState(auth);
+
   const ids = chatId.split("--");
   const friendId = ids[0] === user?.uid ? ids[1] : ids[0];
+
   const [friend] = useDocumentDataOnce(
     doc(db, `users/${friendId}`) as DocumentReference<User, DocumentData>
   );
-
   const [serverMessages, loading, error] = useCollection(
     query(
       collection(db, `messages/${chatId}/message-details`),
       orderBy("timestamp", "desc")
     ) as Query<Omit<Message, "messageId">, DocumentData>
   );
+
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [tempMessage, setTempMessage] =
     useState<Omit<Message, "messageId" | "timestamp">>();
@@ -65,6 +65,8 @@ export default function ChatPage({ params }: ChatPageProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (serverMessages) {
@@ -83,7 +85,7 @@ export default function ChatPage({ params }: ChatPageProps) {
   useEffect(() => {
     async function setUserChats() {
       try {
-        if (user && friend) {
+        if (user && friend && user.uid !== friend.id) {
           const userChat = await getDoc(
             doc(db, `chats/${user.uid}/chat-details/${chatId}`)
           );

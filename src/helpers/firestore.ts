@@ -27,37 +27,51 @@ export async function setRecentChat(
     ) as DocumentReference<{ ids: string[] }, DocumentData>;
 
     const userResult = await getDoc(userRecentChatRef);
-    const userRecentChats = userResult.data();
-    const userRecentChatsLength = userRecentChats?.ids.length as number;
 
-    const friendResult = await getDoc(friendRecentChatRef);
-    const friendRecentChats = friendResult.data();
-    const friendRecentChatsLength = friendRecentChats?.ids.length as number;
-
-    if (userRecentChatsLength >= 3 && friendRecentChatsLength >= 3) {
-      // delete and add for user
-      await updateDoc(doc(db, `recent-chats/${userId}`), {
-        ids: arrayRemove(userRecentChats?.ids[userRecentChatsLength - 1]),
-      });
-      await updateDoc(doc(db, `recent-chats/${userId}`), {
-        ids: arrayUnion(chatId),
-      });
-
-      // delete and add for friend
-      await updateDoc(doc(db, `recent-chats/${friendId}`), {
-        ids: arrayRemove(friendRecentChats?.ids[friendRecentChatsLength - 1]),
-      });
-      await updateDoc(doc(db, `recent-chats/${friendId}`), {
-        ids: arrayUnion(chatId),
-      });
-    } else {
-      // add for user and friend
+    if (!userResult.exists()) {
       await setDoc(doc(db, `recent-chats/${userId}`), {
         ids: arrayUnion(chatId),
       });
-      await setDoc(doc(db, `recent-chats/${friendId}`), {
+    } else {
+      const userRecentChats = userResult.data();
+      const userRecentChatsLength = userRecentChats?.ids.length as number;
+
+      if (userRecentChatsLength >= 3) {
+        await updateDoc(doc(db, `recent-chats/${userId}`), {
+          ids: arrayRemove(userRecentChats?.ids[userRecentChatsLength - 1]),
+        });
+        await updateDoc(doc(db, `recent-chats/${userId}`), {
+          ids: arrayUnion(chatId),
+        });
+      } else {
+        await setDoc(doc(db, `recent-chats/${userId}`), {
+          ids: arrayUnion(chatId),
+        });
+      }
+    }
+
+    const friendResult = await getDoc(friendRecentChatRef);
+
+    if (!userResult.exists()) {
+      await setDoc(doc(db, `recent-chats/${userId}`), {
         ids: arrayUnion(chatId),
       });
+    } else {
+      const friendRecentChats = friendResult.data();
+      const friendRecentChatsLength = friendRecentChats?.ids.length as number;
+
+      if (friendRecentChatsLength >= 3) {
+        await updateDoc(doc(db, `recent-chats/${friendId}`), {
+          ids: arrayRemove(friendRecentChats?.ids[friendRecentChatsLength - 1]),
+        });
+        await updateDoc(doc(db, `recent-chats/${friendId}`), {
+          ids: arrayUnion(chatId),
+        });
+      } else {
+        await setDoc(doc(db, `recent-chats/${friendId}`), {
+          ids: arrayUnion(chatId),
+        });
+      }
     }
   } catch (error) {
     console.log(error);

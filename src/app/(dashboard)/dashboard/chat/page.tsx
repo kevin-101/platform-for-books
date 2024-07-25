@@ -33,7 +33,7 @@ export default function ChatsPage() {
   return (
     <div className="flex flex-col w-full">
       {chats ? (
-        chats?.map((chat, i) => {
+        chats.map((chat) => {
           return (
             <Link
               key={chat.id}
@@ -49,7 +49,7 @@ export default function ChatsPage() {
                     className="rounded-full"
                   />
                 </div>
-                <div className="flex flex-col truncate">
+                <div className="flex flex-col justify-center truncate">
                   <p className="text-lg lg:text-xl font-bold">
                     {chat.chatName}
                   </p>
