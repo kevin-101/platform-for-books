@@ -61,11 +61,13 @@ export default function SharedBookPage({
       <div className="flex flex-col lg:flex-row items-center w-full h-full">
         <div className="flex flex-col items-center justify-center w-full h-auto lg:h-full gap-4 bg-muted">
           <div className="relative w-full h-auto">
-            <img
-              src={sharedBook?.bookImageUrl as string}
-              alt={`${sharedBook?.bookName} image`}
-              className="object-contain"
-            />
+            {sharedBook && (
+              <img
+                src={sharedBook?.bookImageUrl as string}
+                alt={`${sharedBook?.bookName} image`}
+                className="object-contain"
+              />
+            )}
           </div>
         </div>
 

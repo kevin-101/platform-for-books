@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { CheckCheckIcon, Clock2Icon } from "lucide-react";
+import { memo } from "react";
 
 type MessagesProps = {
   messages: Message[] | undefined;
@@ -6,11 +8,9 @@ type MessagesProps = {
   friendId: string;
 };
 
-export default function Messages({
-  messages,
-  userId,
-  friendId,
-}: MessagesProps) {
+function Messages({ messages, userId, friendId }: MessagesProps) {
+  console.log("Messages rendered");
+
   return (
     <>
       {messages?.map((message) => {
@@ -29,12 +29,19 @@ export default function Messages({
               })}
             >
               <p className="w-full whitespace-pre-wrap">{message.message}</p>
-              {message.timestamp && (
-                <p className="flex justify-end w-full text-muted-foreground text-xs">
+              {message.timestamp ? (
+                <p className="flex justify-end gap-2 w-full text-muted-foreground text-xs">
                   {message.timestamp
                     .toDate()
                     .toLocaleTimeString("en-US", { timeStyle: "short" })}
+                  {message.userId === userId && (
+                    <CheckCheckIcon className="size-4" />
+                  )}
                 </p>
+              ) : (
+                <span className="flex justify-end w-full text-muted-foreground text-xs">
+                  <Clock2Icon className="size-2" />
+                </span>
               )}
             </div>
           </div>
@@ -43,3 +50,5 @@ export default function Messages({
     </>
   );
 }
+
+export default memo(Messages);

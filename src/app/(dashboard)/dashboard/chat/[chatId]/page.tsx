@@ -19,12 +19,7 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-import {
-  ArrowLeft,
-  ChevronDownIcon,
-  Clock2Icon,
-  Loader2Icon,
-} from "lucide-react";
+import { ArrowLeft, ChevronDownIcon, Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -57,9 +52,6 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
   );
 
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
-  const [tempMessage, setTempMessage] =
-    useState<Omit<Message, "messageId" | "timestamp">>();
-  const [sendLoading, setSendLoading] = useState<boolean>(false);
 
   const [isScrollButton, setIsScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -126,17 +118,12 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
   async function sendMessage() {
     // message field should not be empty and user has to be logged in
     if (messageRef.current?.value.length !== 0 && user) {
-      setTempMessage({ message: messageRef.current!.value, userId: user.uid });
-
       try {
-        setSendLoading(true);
-
         await addDoc(collection(db, `messages/${chatId}/message-details`), {
           message: messageRef.current!.value,
           userId: user?.uid,
           timestamp: serverTimestamp(),
         });
-        setTempMessage(undefined);
 
         await setRecentChat(user.uid, friendId, chatId);
         await updateUserChats(
@@ -150,7 +137,6 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
       } catch (error) {
         console.log(error);
       } finally {
-        setSendLoading(false);
         messageRef.current!.value = "";
         messageRef.current?.focus();
       }
@@ -200,22 +186,6 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
           onScroll={() => handleDivScroll()}
         >
           <div ref={bottomRef} />
-
-          {/* temporary message */}
-          {tempMessage && (
-            <div className="flex w-full justify-end">
-              <div className="rounded-md p-3 max-w-[90%] break-words bg-orange-200">
-                <p className="w-full whitespace-pre-wrap">
-                  {tempMessage.message}
-                </p>
-                {sendLoading && (
-                  <div className="flex justify-end w-full text-muted-foreground">
-                    <Clock2Icon className="size-2" />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {loading ? (
             <Loader2Icon className="size-8 text-orange-500 animate-spin" />
