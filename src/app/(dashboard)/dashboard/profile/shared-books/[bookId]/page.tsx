@@ -1,8 +1,20 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth, db, storage } from "@/lib/firebase";
+import { cn } from "@/lib/utils";
 import {
   deleteDoc,
   doc,
@@ -10,6 +22,7 @@ import {
   DocumentReference,
 } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import { Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -35,11 +48,14 @@ export default function SharedBookPage({
   );
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+
   const router = useRouter();
 
   async function handleDelete() {
     if (user && sharedBook) {
       try {
+        setDeleteLoading(true);
         const bookImageRef = ref(storage, sharedBook.bookImageUrl);
         await deleteObject(bookImageRef);
 
@@ -52,15 +68,17 @@ export default function SharedBookPage({
       } catch (error) {
         toast.error("Something went wrong");
         console.log(error);
+      } finally {
+        setDeleteLoading(false);
       }
     }
   }
 
   return (
     <div className="w-full h-full px-4 pt-4 md:py-8">
-      <div className="flex flex-col lg:flex-row items-center w-full h-full">
-        <div className="flex flex-col items-center justify-center w-full h-auto lg:h-full gap-4 bg-muted">
-          <div className="relative w-full h-auto">
+      <div className="flex flex-col xl:flex-row gap-4 xl:gap-0 items-center w-full h-full">
+        <div className="flex flex-col items-center justify-center w-full h-auto xl:h-full gap-4 bg-muted">
+          <div className={cn("relative w-full h-auto", !sharedBook && "h-40")}>
             {sharedBook && (
               <img
                 src={sharedBook?.bookImageUrl as string}
@@ -83,6 +101,7 @@ export default function SharedBookPage({
               disabled={!isEdit}
             />
           </form>
+
           <div className="flex w-full justify-end gap-4">
             {isEdit ? (
               <>
@@ -93,7 +112,35 @@ export default function SharedBookPage({
               </>
             ) : (
               <>
-                <Button variant="destructive">Delete</Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" disabled={deleteLoading}>
+                      {deleteLoading ? (
+                        <Loader2Icon className="size-5 animate-spin" />
+                      ) : (
+                        "Delete"
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm delete</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete this shared book.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete()}>
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
                 <Button onClick={() => setIsEdit(true)}>Edit</Button>
               </>
             )}
