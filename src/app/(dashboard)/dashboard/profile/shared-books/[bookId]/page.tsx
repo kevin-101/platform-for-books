@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth, db, storage } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
 import {
   deleteDoc,
   doc,
@@ -29,6 +28,7 @@ import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { toast } from "sonner";
+import BookLoading from "./loading";
 
 type SharedBookPageProps = {
   params: {
@@ -74,22 +74,26 @@ export default function SharedBookPage({
     }
   }
 
+  if (bookLoading) {
+    return <BookLoading />;
+  }
+
   return (
     <div className="w-full h-full px-4 pt-4 md:py-8">
       <div className="flex flex-col xl:flex-row gap-4 xl:gap-0 items-center w-full h-full">
-        <div className="flex flex-col items-center justify-center w-full h-auto xl:h-full gap-4 bg-muted">
-          <div className={cn("relative w-full h-auto", !sharedBook && "h-40")}>
+        <div className="flex items-center w-full aspect-video xl:h-full bg-muted">
+          <div className="relative flex items-center aspect-video xl:aspect-square">
             {sharedBook && (
               <img
-                src={sharedBook?.bookImageUrl as string}
-                alt={`${sharedBook?.bookName} image`}
+                src={sharedBook.bookImageUrl}
+                alt={`${sharedBook.bookName} image`}
                 className="object-contain"
               />
             )}
           </div>
         </div>
 
-        <div className="flex flex-col w-full gap-4 px-4">
+        <div className="flex flex-col w-full gap-4 xl:px-4">
           <form className="space-y-1 w-full">
             <label htmlFor={sharedBook?.bookId} className="font-medium">
               Name

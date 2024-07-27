@@ -129,7 +129,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
       <DialogTrigger asChild>
         <button
           className={cn(
-            "relative flex flex-col w-full h-32 md:h-[20vw] lg:h-[15vw] justify-center items-center bg-orange-100 hover:bg-orange-200 transition-colors",
+            "flex justify-center items-center bg-orange-100 hover:bg-orange-200 transition-colors",
             className
           )}
         >
