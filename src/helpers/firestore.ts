@@ -44,7 +44,7 @@ export async function setRecentChat(
           ids: arrayUnion(chatId),
         });
       } else {
-        await setDoc(doc(db, `recent-chats/${userId}`), {
+        await updateDoc(doc(db, `recent-chats/${userId}`), {
           ids: arrayUnion(chatId),
         });
       }
@@ -68,7 +68,7 @@ export async function setRecentChat(
           ids: arrayUnion(chatId),
         });
       } else {
-        await setDoc(doc(db, `recent-chats/${friendId}`), {
+        await updateDoc(doc(db, `recent-chats/${friendId}`), {
           ids: arrayUnion(chatId),
         });
       }
