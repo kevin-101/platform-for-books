@@ -8,9 +8,11 @@ import {
   arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { Loader2Icon, Plus } from "lucide-react";
@@ -49,9 +51,24 @@ export default function AddFriendPage() {
     try {
       setReqsendLoading(true);
       const requestingUserId = user?.uid as string;
-      await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
-        ids: arrayUnion(requestingUserId),
-      });
+
+      const incomingFr = await getDoc(
+        doc(db, `incoming-friend-requests/${requestedUser.id}`)
+      );
+
+      if (!incomingFr.exists()) {
+        await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
+          ids: arrayUnion(requestingUserId),
+        });
+      } else {
+        await updateDoc(
+          doc(db, `incoming-friend-requests/${requestedUser.id}`),
+          {
+            ids: arrayUnion(requestingUserId),
+          }
+        );
+      }
+
       toast.success("Friend Request Sent");
     } catch (error) {
       console.error(error);

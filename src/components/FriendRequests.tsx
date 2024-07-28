@@ -6,6 +6,7 @@ import {
   arrayRemove,
   arrayUnion,
   doc,
+  getDoc,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -53,13 +54,30 @@ export default function FriendRequests({
     try {
       setAcceptLoading(true);
 
+      const userFriends = await getDoc(doc(db, `friends/${user?.uid}`));
+      const otherUserFriends = await getDoc(doc(db, `friends/${friendId}`));
+
       // add friends mutually and delete incoming request
-      await setDoc(doc(db, `friends/${user?.uid}`), {
-        ids: arrayUnion(friendId),
-      });
-      await setDoc(doc(db, `friends/${friendId}`), {
-        ids: arrayUnion(user?.uid),
-      });
+      if (!userFriends.exists()) {
+        await setDoc(doc(db, `friends/${user?.uid}`), {
+          ids: arrayUnion(friendId),
+        });
+      } else {
+        await updateDoc(doc(db, `friends/${user?.uid}`), {
+          ids: arrayUnion(friendId),
+        });
+      }
+
+      if (!otherUserFriends.exists()) {
+        await setDoc(doc(db, `friends/${friendId}`), {
+          ids: arrayUnion(user?.uid),
+        });
+      } else {
+        await updateDoc(doc(db, `friends/${friendId}`), {
+          ids: arrayUnion(user?.uid),
+        });
+      }
+
       await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
         ids: arrayRemove(friendId),
       });
