@@ -79,7 +79,7 @@ export default function DashboardSideNav({
   return (
     <nav
       className={cn(
-        "h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col w-96 border-r border-orange-200 bg-orange-50",
+        "fixed top-0 h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col w-96 border-r border-orange-200 bg-orange-50",
         className
       )}
     >
