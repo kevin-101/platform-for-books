@@ -73,7 +73,7 @@ export default function MobileNav({
   return (
     <header
       className={cn(
-        "fixed top-0 z-50 flex lg:hidden w-full justify-end px-2 py-1 border-b border-orange-200 bg-orange-50",
+        "sticky top-0 z-50 flex lg:hidden w-full justify-end px-2 py-1 border-b border-orange-200 bg-orange-50",
         className,
         {
           hidden: pathname === `/dashboard/chat/${chatId}`,

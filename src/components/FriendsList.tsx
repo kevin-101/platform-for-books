@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "./ui/button";
-import { EllipsisVerticalIcon, MessageCircleIcon } from "lucide-react";
+import { EllipsisVerticalIcon, MessageCircleIcon, XIcon } from "lucide-react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import {
   DocumentData,
@@ -28,9 +28,10 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
-import { formatChatId } from "@/lib/utils";
+import { cn, formatChatId } from "@/lib/utils";
 import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
+import { Input } from "./ui/input";
 
 type FriendsListProps = {};
 
@@ -48,6 +49,8 @@ export default function FriendsList({}: FriendsListProps) {
       DocumentData
     >
   );
+
+  const [searchText, setSearchText] = useState<string>("");
   const [friends, setFriends] = useState<User[]>([]);
 
   useEffect(() => {
@@ -102,23 +105,50 @@ export default function FriendsList({}: FriendsListProps) {
   return friends.length === 0 ? (
     <h1 className="text-xl font-bold">No friends lol</h1>
   ) : (
-    <ul className="flex flex-col gap-4 w-full">
-      {friends?.map((friend, _) => {
-        return (
-          <UserListItem
-            key={friend.id}
-            user={friend}
-            actions={
-              <FriendsListActions
-                friend={friend}
-                user={user}
-                removeFn={() => removeFriend(friend.id)}
-              />
-            }
+    <div className="flex flex-col w-full gap-6">
+      <div className="w-full bg-background sticky top-11 lg:top-0 z-40">
+        <div className="w-full lg:w-3/4 xl:w-1/2 py-2 flex gap-2">
+          <Input
+            type="text"
+            value={searchText}
+            placeholder="Search friends"
+            onChange={(e) => setSearchText(e.target.value)}
           />
-        );
-      })}
-    </ul>
+
+          <Button
+            variant="outline"
+            className={cn({ invisible: !searchText })}
+            onClick={() => setSearchText("")}
+          >
+            <XIcon className="size-5" />
+          </Button>
+        </div>
+      </div>
+
+      <ul className="flex flex-col gap-4 w-full">
+        {friends
+          ?.filter((friend) =>
+            friend.displayName
+              .toLocaleLowerCase()
+              .includes(searchText.toLocaleLowerCase())
+          )
+          .map((friend, _) => {
+            return (
+              <UserListItem
+                key={friend.id}
+                user={friend}
+                actions={
+                  <FriendsListActions
+                    friend={friend}
+                    user={user}
+                    removeFn={() => removeFriend(friend.id)}
+                  />
+                }
+              />
+            );
+          })}
+      </ul>
+    </div>
   );
 }
 

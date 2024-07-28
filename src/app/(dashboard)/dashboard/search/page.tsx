@@ -41,13 +41,14 @@ export default function SearchPage() {
       </div>
 
       <div className="w-full bg-background sticky top-11 lg:top-0 z-40">
-        <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2 bg-background">
+        <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2">
           <Input
             ref={searchRef}
             type="text"
             placeholder="Search for users"
             onChange={(e) => searchBooks(e)}
           />
+
           <Button
             variant="outline"
             className={cn(!searchRef.current?.value && "invisible")}

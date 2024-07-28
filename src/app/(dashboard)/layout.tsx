@@ -3,7 +3,6 @@
 import DashboardSideNav from "@/components/DashboardSideNav";
 import MobileNav from "@/components/MobileNav";
 import { auth, db } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
 import {
   DocumentData,
   DocumentReference,
@@ -14,7 +13,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDocumentData } from "react-firebase-hooks/firestore";
@@ -24,7 +23,6 @@ type DashboardLayoutProps = {
 };
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const pathname = usePathname();
   const router = useRouter();
 
   const [user] = useAuthState(auth, {
@@ -75,7 +73,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [recentChatIds]);
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col lg:flex-row">
+    <div className="w-full min-h-[100dvh] flex flex-col lg:flex-row">
       <DashboardSideNav
         user={user}
         recentChats={recentChats}
@@ -86,13 +84,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         recentChats={recentChats}
         friendRequests={friendRequests?.ids}
       />
-      <main
-        className={cn("flex-1 w-full pt-11 pl-0 lg:pt-0 lg:pl-96", {
-          "pt-0": pathname.includes("/dashboard/chat/"),
-        })}
-      >
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
