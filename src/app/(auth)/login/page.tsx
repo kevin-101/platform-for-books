@@ -12,29 +12,40 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function Page() {
-  const [user] = useAuthState(auth);
+  const router = useRouter();
+
+  const [user] = useAuthState(auth, {
+    onUserChanged: async (user) => {
+      if (user) {
+        const redir = await getRedirectResult(auth);
+        if (!redir) {
+          router.replace("/dashboard");
+        }
+      }
+    },
+  });
   const googleProvider = new GoogleAuthProvider();
   const [signInWithGoogle, loading] = useSignInWithRedirect(
     auth,
     googleProvider
   );
+
   const [redirectLoading, setRedirectLoading] = useState<boolean>(false);
-  const router = useRouter();
 
   useEffect(() => {
     // this function takes care of the logic when
     // the signin redirects back to this page
     async function handleRedirect() {
-      if (user) {
-        setRedirectLoading(true);
-
-        try {
+      try {
+        if (user) {
           const result = await getRedirectResult(auth);
-          const userId = result?.user.uid as string;
-          const dbUser = await getDoc(doc(db, "users", userId));
+          setRedirectLoading(true);
+
+          const userId = result?.user.uid;
+          const dbUser = await getDoc(doc(db, `users/${userId}`));
 
           // check if user doesn't exist
-          if (!dbUser.exists()) {
+          if (!dbUser.exists() && userId) {
             await setDoc(doc(db, "users", userId), {
               id: userId,
               displayName: result?.user.displayName,
@@ -44,13 +55,13 @@ export default function Page() {
           }
 
           setRedirectLoading(false);
-          router.push("/dashboard");
-        } catch (error) {
-          toast.error(`Something went wrong. Please try again`);
-          console.log(error);
-        } finally {
-          setRedirectLoading(false);
+          router.replace("/dashboard");
         }
+      } catch (error) {
+        toast.error(`Something went wrong. Please try again`);
+        console.log(error);
+      } finally {
+        setRedirectLoading(false);
       }
     }
 
