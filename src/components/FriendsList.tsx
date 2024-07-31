@@ -15,8 +15,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { db } from "@/lib/firebase";
 import LoadingComp from "./LoadingComp";
 import ErrorComp from "./ErrorComp";
 import UserListItem from "./UserListItem";
@@ -32,6 +31,7 @@ import { cn, formatChatId } from "@/lib/utils";
 import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
+import { useAuthContext } from "./AuthProvider";
 
 type FriendsListProps = {};
 
@@ -42,7 +42,7 @@ type FriendsListActionsProps = {
 };
 
 export default function FriendsList({}: FriendsListProps) {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const [friendIds, loading, error] = useDocumentData(
     doc(db, `friends/${user?.uid}`) as DocumentReference<
       { ids: string[] },

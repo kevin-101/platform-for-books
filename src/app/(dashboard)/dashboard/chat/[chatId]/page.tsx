@@ -1,10 +1,11 @@
 "use client";
 
+import { useAuthContext } from "@/components/AuthProvider";
 import Messages from "@/components/Messages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { setRecentChat, updateUserChats } from "@/helpers/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
 import {
   DocumentData,
@@ -23,7 +24,6 @@ import { ArrowLeft, ChevronDownIcon, Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import {
   useCollection,
   useDocumentDataOnce,
@@ -36,7 +36,7 @@ type ChatPageProps = {
 };
 
 export default function ChatPage({ params: { chatId } }: ChatPageProps) {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
 
   const ids = chatId.split("--");
   const friendId = ids[0] === user?.uid ? ids[1] : ids[0];

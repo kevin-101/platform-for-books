@@ -1,9 +1,10 @@
 "use client";
 
+import { useAuthContext } from "@/components/AuthProvider";
 import UserListItem from "@/components/UserListItem";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   arrayUnion,
   collection,
@@ -17,7 +18,6 @@ import {
 } from "firebase/firestore";
 import { Loader2Icon, Plus } from "lucide-react";
 import { ChangeEvent, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { toast } from "sonner";
 
 type AddActionsProps = {
@@ -26,7 +26,7 @@ type AddActionsProps = {
 };
 
 export default function AddFriendPage() {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const [matchingUsers, setMatchingUsers] = useState<User[]>([]);
   const [reqSendLoading, setReqsendLoading] = useState<boolean>(false);
 

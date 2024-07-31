@@ -1,7 +1,7 @@
 "use client";
 
 import ErrorComp from "@/components/ErrorComp";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   collection,
   CollectionReference,
@@ -11,15 +11,15 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection, useDocumentData } from "react-firebase-hooks/firestore";
 import ProfileLoading from "./loading";
 import Link from "next/link";
 import AddBookButton from "@/components/AddBookButton";
 import ProfileHeader from "@/components/ProfileHeader";
+import { useAuthContext } from "@/components/AuthProvider";
 
 export default function ProfilePage() {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const [dbUser, dbUserLoading, dbUserError] = useDocumentData(
     doc(db, `users/${user?.uid}`) as DocumentReference<User, DocumentData>
   );
@@ -27,15 +27,17 @@ export default function ProfilePage() {
     collection(
       db,
       `shared-books/${user?.uid}/book-details`
-    ) as CollectionReference<Omit<SharedBook, "bookDocId">, DocumentData>
+    ) as CollectionReference<Omit<UserSharedBook, "bookDocId">, DocumentData>
   );
-  const [sharedBooks, setSharedBooks] = useState<SharedBook[] | undefined>();
+  const [sharedBooks, setSharedBooks] = useState<
+    UserSharedBook[] | undefined
+  >();
 
   useEffect(() => {
     async function getSharedBooks() {
       if (user && userBooks && userBooks.size > 0) {
         try {
-          const sharedBook: SharedBook[] = [];
+          const sharedBook: UserSharedBook[] = [];
           userBooks.forEach((book) => {
             sharedBook.push({ bookDocId: book.id, ...book.data() });
           });

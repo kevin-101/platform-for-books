@@ -1,9 +1,10 @@
 "use client";
 
+import { useAuthContext } from "@/components/AuthProvider";
 import ErrorComp from "@/components/ErrorComp";
 import FriendRequests from "@/components/FriendRequests";
 import LoadingComp from "@/components/LoadingComp";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   DocumentData,
   DocumentReference,
@@ -15,11 +16,10 @@ import {
   where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 
 export default function FriendRequestsPage() {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const reqRef = doc(
     db,
     `incoming-friend-requests/${user?.uid}`

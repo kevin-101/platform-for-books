@@ -41,6 +41,7 @@ export default function Page() {
           const result = await getRedirectResult(auth);
           setRedirectLoading(true);
 
+          const idToken = await user.getIdToken();
           const userId = result?.user.uid;
           const dbUser = await getDoc(doc(db, `users/${userId}`));
 
@@ -54,6 +55,7 @@ export default function Page() {
             });
           }
 
+          document.cookie = `idToken=${idToken}`;
           setRedirectLoading(false);
           router.replace("/dashboard");
         }

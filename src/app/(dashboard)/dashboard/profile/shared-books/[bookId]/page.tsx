@@ -25,10 +25,10 @@ import { Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { toast } from "sonner";
 import BookLoading from "./loading";
+import { useAuthContext } from "@/components/AuthProvider";
 
 type SharedBookPageProps = {
   params: {
@@ -39,12 +39,12 @@ type SharedBookPageProps = {
 export default function SharedBookPage({
   params: { bookId },
 }: SharedBookPageProps) {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const [sharedBook, bookLoading] = useDocumentData(
     doc(
       db,
       `shared-books/${user?.uid}/book-details/${bookId}`
-    ) as DocumentReference<Omit<SharedBook, "bookDocId">, DocumentData>
+    ) as DocumentReference<Omit<UserSharedBook, "bookDocId">, DocumentData>
   );
 
   const [isEdit, setIsEdit] = useState<boolean>(false);

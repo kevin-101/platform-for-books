@@ -40,8 +40,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
     string | ArrayBuffer | null | undefined
   >();
 
-  const [uploadImage, uploadLoading, imageUploadSnapshot, uploadError] =
-    useUploadFile();
+  const [uploadImage, uploadLoading, imageUploadSnapshot] = useUploadFile();
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const bookImageRef = useRef<HTMLInputElement>(null);

@@ -21,9 +21,13 @@ type Chat = {
   timestamp: import("firebase/firestore").Timestamp;
 };
 
-type SharedBook = {
+type UserSharedBook = {
   bookDocId: string;
   bookId: string;
   bookName: string;
   bookImageUrl: string;
+};
+
+type AllSharedBook = Omit<UserSharedBook, "bookImageUrl"> & {
+  userId: string;
 };

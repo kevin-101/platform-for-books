@@ -23,7 +23,7 @@ function Messages({ messages, userId, friendId }: MessagesProps) {
             })}
           >
             <div
-              className={cn("rounded-md p-3 max-w-[90%] break-words", {
+              className={cn("rounded-md p-3 min-w-28 max-w-[90%] break-words", {
                 "bg-orange-200": message.userId === userId,
                 "bg-muted": message.userId === friendId,
               })}

@@ -36,7 +36,7 @@ export async function setRecentChat(
       const userRecentChats = userResult.data();
       const userRecentChatsLength = userRecentChats?.ids.length as number;
 
-      if (userRecentChatsLength >= 3) {
+      if (userRecentChatsLength >= 3 && !userRecentChats.ids.includes(chatId)) {
         await updateDoc(doc(db, `recent-chats/${userId}`), {
           ids: arrayRemove(userRecentChats?.ids[userRecentChatsLength - 1]),
         });
@@ -52,7 +52,7 @@ export async function setRecentChat(
 
     const friendResult = await getDoc(friendRecentChatRef);
 
-    if (!userResult.exists()) {
+    if (!friendResult.exists()) {
       await setDoc(doc(db, `recent-chats/${userId}`), {
         ids: arrayUnion(chatId),
       });
@@ -60,7 +60,10 @@ export async function setRecentChat(
       const friendRecentChats = friendResult.data();
       const friendRecentChatsLength = friendRecentChats?.ids.length as number;
 
-      if (friendRecentChatsLength >= 3) {
+      if (
+        friendRecentChatsLength >= 3 &&
+        !friendRecentChats.ids.includes(chatId)
+      ) {
         await updateDoc(doc(db, `recent-chats/${friendId}`), {
           ids: arrayRemove(friendRecentChats?.ids[friendRecentChatsLength - 1]),
         });

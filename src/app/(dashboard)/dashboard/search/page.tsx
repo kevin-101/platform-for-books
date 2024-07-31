@@ -2,7 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
+import {
+  collection,
+  DocumentData,
+  getDocs,
+  Query,
+  query,
+  where,
+} from "firebase/firestore";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
 import { ChangeEvent, useRef, useState } from "react";
@@ -22,10 +31,22 @@ export default function SearchPage() {
       const data = await response.json();
       const books = data.items as Book[];
 
-      const queryBooks: string[] = [];
-      books.forEach((book) => queryBooks.push(book.volumeInfo.title));
+      // const queryBooks: string[] = [];
+      // books.forEach((book) => queryBooks.push(book.volumeInfo.title));
 
-      setQueryResults(data.items);
+      // const allSharedBook: AllSharedBook[] = [];
+      // const bookSnaphot = await getDocs(
+      //   query(
+      //     collection(db, `all-shared-books`),
+      //     where("bookName", "in", queryBooks)
+      //   ) as Query<Omit<AllSharedBook, "bookDocId">, DocumentData>
+      // );
+
+      // bookSnaphot.forEach((book) => {
+      //   allSharedBook.push({ bookDocId: book.id, ...book.data() });
+      // });
+
+      setQueryResults(books);
     } else {
       setQueryResults([]);
     }

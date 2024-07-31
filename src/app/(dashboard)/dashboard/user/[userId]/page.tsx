@@ -35,14 +35,16 @@ export default function UserProfilePage({
     collection(
       db,
       `shared-books/${userId}/book-details`
-    ) as CollectionReference<Omit<SharedBook, "bookDocId">, DocumentData>
+    ) as CollectionReference<Omit<UserSharedBook, "bookDocId">, DocumentData>
   );
 
-  const [sharedBooks, setSharedBooks] = useState<SharedBook[] | undefined>();
+  const [sharedBooks, setSharedBooks] = useState<
+    UserSharedBook[] | undefined
+  >();
 
   useEffect(() => {
     function getSharedBooks() {
-      const books: SharedBook[] = [];
+      const books: UserSharedBook[] = [];
 
       booksSnapshot?.forEach((bk) =>
         books.push({ bookDocId: bk.id, ...bk.data() })

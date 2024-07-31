@@ -1,8 +1,9 @@
 "use client";
 
+import { useAuthContext } from "@/components/AuthProvider";
 import ErrorComp from "@/components/ErrorComp";
 import LoadingComp from "@/components/LoadingComp";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   CollectionReference,
   DocumentData,
@@ -10,11 +11,10 @@ import {
 } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
 export default function ChatsPage() {
-  const [user] = useAuthState(auth);
+  const [user] = useAuthContext();
   const [chats, loading, error] = useCollectionData(
     collection(db, `chats/${user?.uid}/chat-details`) as CollectionReference<
       Chat,
