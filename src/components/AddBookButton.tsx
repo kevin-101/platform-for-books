@@ -14,7 +14,18 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useUploadFile } from "react-firebase-hooks/storage";
 import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  CollectionReference,
+  doc,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db, storage } from "@/lib/firebase";
 import { getDownloadURL, ref } from "firebase/storage";
 import { ChevronsUpDownIcon, Loader2Icon, PlusIcon } from "lucide-react";
@@ -105,6 +116,31 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
           bookName: selectedBook.bookName,
           bookImageUrl: uploadedImageUrl,
         });
+
+        const sharedBookDoc = await getDoc(
+          doc(db, `all-shared-books/${selectedBook.bookId}`)
+        );
+        if (!sharedBookDoc.exists()) {
+          await setDoc(
+            doc(
+              db,
+              `all-shared-books/${selectedBook.bookId}`
+            ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
+            {
+              userIds: arrayUnion(user.uid),
+            }
+          );
+        } else {
+          await updateDoc(
+            doc(
+              db,
+              `all-shared-books/${selectedBook.bookId}`
+            ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
+            {
+              userIds: arrayUnion(user.uid),
+            }
+          );
+        }
 
         setDialogState(false);
         toast.success("Book added successfully");

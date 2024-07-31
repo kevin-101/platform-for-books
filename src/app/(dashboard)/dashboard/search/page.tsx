@@ -2,26 +2,30 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import UserListItem from "@/components/UserListItem";
 import { db } from "@/lib/firebase";
-import { cn } from "@/lib/utils";
+import { cn, debounce } from "@/lib/utils";
 import {
   collection,
   DocumentData,
+  documentId,
   getDocs,
   Query,
   query,
   where,
 } from "firebase/firestore";
-import { XIcon } from "lucide-react";
-import Image from "next/image";
-import { ChangeEvent, useRef, useState } from "react";
+import { Loader2, XIcon } from "lucide-react";
+import { ChangeEvent, useMemo, useRef, useState } from "react";
 
 export default function SearchPage() {
-  const [queryResults, setQueryResults] = useState<Book[] | undefined>();
+  const [queryResults, setQueryResults] = useState<User[] | undefined>();
+  const [resultsLoading, setResultsLoading] = useState<boolean>(false);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
   async function searchBooks(e: ChangeEvent<HTMLInputElement>) {
+    setResultsLoading(true);
+    setQueryResults([]);
     const searchString = e.target.value;
 
     if (searchString && searchString.length > 0) {
@@ -31,26 +35,48 @@ export default function SearchPage() {
       const data = await response.json();
       const books = data.items as Book[];
 
-      // const queryBooks: string[] = [];
-      // books.forEach((book) => queryBooks.push(book.volumeInfo.title));
+      const queryBookIds: string[] = [];
+      books.forEach((book) => queryBookIds.push(book.id));
 
-      // const allSharedBook: AllSharedBook[] = [];
-      // const bookSnaphot = await getDocs(
-      //   query(
-      //     collection(db, `all-shared-books`),
-      //     where("bookName", "in", queryBooks)
-      //   ) as Query<Omit<AllSharedBook, "bookDocId">, DocumentData>
-      // );
+      if (queryBookIds && queryBookIds.length > 0) {
+        const sharedUserIds: string[] = [];
 
-      // bookSnaphot.forEach((book) => {
-      //   allSharedBook.push({ bookDocId: book.id, ...book.data() });
-      // });
+        const bookSnaphot = await getDocs(
+          query(
+            collection(db, `all-shared-books`),
+            where(documentId(), "in", queryBookIds)
+          ) as Query<Omit<AllSharedBook, "bookId">, DocumentData>
+        );
+        bookSnaphot.forEach((book) => {
+          sharedUserIds.push(...book.data().userIds);
+        });
 
-      setQueryResults(books);
+        if (sharedUserIds && sharedUserIds.length > 0) {
+          const booksSharedUsers: User[] = [];
+
+          const sharedUsersSnapshot = await getDocs(
+            query(
+              collection(db, `users`),
+              where(documentId(), "in", sharedUserIds)
+            ) as Query<User, DocumentData>
+          );
+          sharedUsersSnapshot.forEach((user) => {
+            booksSharedUsers.push({ ...user.data() });
+          });
+
+          setQueryResults(booksSharedUsers);
+        }
+      }
+      setResultsLoading(false);
     } else {
       setQueryResults([]);
+      setResultsLoading(false);
     }
   }
+
+  const debouncedSearch = useMemo(() => {
+    return debounce(searchBooks, 600);
+  }, [searchBooks]);
 
   return (
     <div className="flex flex-col gap-6 p-4 pt-8 bg-background">
@@ -67,7 +93,7 @@ export default function SearchPage() {
             ref={searchRef}
             type="text"
             placeholder="Search for users"
-            onChange={(e) => searchBooks(e)}
+            onChange={(e) => debouncedSearch(e)}
           />
 
           <Button
@@ -85,37 +111,24 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 w-full items-center">
-        {queryResults?.map((book) => {
-          return (
-            <div
-              key={book.id}
-              className="flex flex-col gap-2 w-full min-h-full items-center px-2 py-4 border border-orange-200 rounded-md cursor-pointer hover:bg-orange-100 transition-colors"
-            >
-              <div className="relative flex justify-center items-center w-full h-96">
-                {book.volumeInfo.imageLinks ? (
-                  <Image
-                    alt={`${book.volumeInfo.title} image`}
-                    src={book.volumeInfo.imageLinks.thumbnail}
-                    className="object-contain rounded-md"
-                    fill
-                  />
-                ) : (
-                  <p className="text-lg font-medium text-muted-foreground">
-                    No preview image
-                  </p>
-                )}
-              </div>
-              <h1 className="text-2xl font-bold text-center">
-                {book.volumeInfo.title}
-              </h1>
-              {book.volumeInfo.authors &&
-                book.volumeInfo.authors.length > 0 && (
-                  <p className="text-lg font-medium">{`Author: ${book.volumeInfo.authors[0]}`}</p>
-                )}
-            </div>
-          );
-        })}
+      <div className="flex flex-col gap-4 w-full items-center">
+        {resultsLoading ? (
+          <Loader2 className="size-12 animate-spin text-orange-500" />
+        ) : queryResults && queryResults.length > 0 ? (
+          queryResults.map((user) => {
+            return (
+              <UserListItem
+                key={user.id}
+                user={user}
+                actions={<p>actions</p>}
+              />
+            );
+          })
+        ) : (
+          <p className="text-lg font-medium text-muted-foreground w-full text-center">
+            No results
+          </p>
+        )}
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ type UserSharedBook = {
   bookImageUrl: string;
 };
 
-type AllSharedBook = Omit<UserSharedBook, "bookImageUrl"> & {
-  userId: string;
+type AllSharedBook = {
+  bookId: string;
+  userIds: string[];
 };

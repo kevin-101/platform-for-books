@@ -55,7 +55,9 @@ export default function Page() {
             });
           }
 
-          document.cookie = `idToken=${idToken}`;
+          const year = new Date().getFullYear();
+          const cookieExpiry = new Date(year + 1, 11).toUTCString();
+          document.cookie = `idToken=${idToken};expires=${cookieExpiry}`;
           setRedirectLoading(false);
           router.replace("/dashboard");
         }
