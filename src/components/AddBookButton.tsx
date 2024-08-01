@@ -18,7 +18,6 @@ import {
   addDoc,
   arrayUnion,
   collection,
-  CollectionReference,
   doc,
   DocumentData,
   DocumentReference,
@@ -34,6 +33,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
+import { useDebouncedCallback } from "use-debounce";
 
 type AddBookButtonProps = {
   className?: ClassValue;
@@ -68,20 +68,23 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
     }
   }, [imageUploadSnapshot]);
 
-  async function handleSearch(e: ChangeEvent<HTMLInputElement>) {
-    const query = e.target.value;
+  const handleSearch = useDebouncedCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const query = e.target.value;
 
-    if (query && query.length > 0) {
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${query}`
-      );
-      const data = await res.json();
+      if (query && query.length > 0) {
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=${query}`
+        );
+        const data = await res.json();
 
-      setQueryResults(data.items);
-    } else {
-      setQueryResults([]);
-    }
-  }
+        setQueryResults(data.items);
+      } else {
+        setQueryResults([]);
+      }
+    },
+    600
+  );
 
   function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;

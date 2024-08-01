@@ -98,13 +98,7 @@ export default function FriendsList({}: FriendsListProps) {
     return <ErrorComp />;
   }
 
-  if (loading) {
-    return <LoadingComp />;
-  }
-
-  return friends.length === 0 ? (
-    <h1 className="text-xl font-bold">No friends lol</h1>
-  ) : (
+  return (
     <div className="flex flex-col w-full gap-6">
       <div className="w-full bg-background sticky top-11 lg:top-0 z-40">
         <div className="w-full lg:w-3/4 xl:w-1/2 py-2 flex gap-2">
@@ -125,29 +119,35 @@ export default function FriendsList({}: FriendsListProps) {
         </div>
       </div>
 
-      <ul className="flex flex-col gap-4 w-full">
-        {friends
-          ?.filter((friend) =>
-            friend.displayName
-              .toLocaleLowerCase()
-              .includes(searchText.toLocaleLowerCase())
-          )
-          .map((friend, _) => {
-            return (
-              <UserListItem
-                key={friend.id}
-                user={friend}
-                actions={
-                  <FriendsListActions
-                    friend={friend}
-                    user={user}
-                    removeFn={() => removeFriend(friend.id)}
-                  />
-                }
-              />
-            );
-          })}
-      </ul>
+      {loading ? (
+        <LoadingComp />
+      ) : friends && friends.length > 0 ? (
+        <ul className="flex flex-col gap-4 w-full">
+          {friends
+            .filter((friend) =>
+              friend.displayName
+                .toLowerCase()
+                .includes(searchText.toLowerCase())
+            )
+            .map((friend, _) => {
+              return (
+                <UserListItem
+                  key={friend.id}
+                  user={friend}
+                  actions={
+                    <FriendsListActions
+                      friend={friend}
+                      user={user}
+                      removeFn={() => removeFriend(friend.id)}
+                    />
+                  }
+                />
+              );
+            })}
+        </ul>
+      ) : (
+        <h1 className="text-xl font-bold">No friends</h1>
+      )}
     </div>
   );
 }
@@ -158,12 +158,13 @@ function FriendsListActions({
   removeFn,
 }: FriendsListActionsProps) {
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-2 md:gap-4 items-center">
       <Button asChild size="icon">
         <Link href={`/dashboard/chat/${formatChatId([friend.id, user?.uid])}`}>
           <MessageCircleIcon className="size-5" />
         </Link>
       </Button>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
