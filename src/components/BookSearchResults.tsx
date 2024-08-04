@@ -10,13 +10,14 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { Loader2, MessageCircleIcon, User, UserIcon } from "lucide-react";
+import { Loader2, MessageCircleIcon, UserIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import UserListItem from "./UserListItem";
 import { Button } from "./ui/button";
 import { formatChatId } from "@/lib/utils";
 import { useAuthContext } from "./AuthProvider";
 import Link from "next/link";
+import { toast } from "sonner";
 
 type BookSearchResultsProps = {
   searchTerm: string | undefined;
@@ -30,50 +31,63 @@ export default function BookSearchResults({
   const [resultsLoading, setResultsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    // TODO: categorize the data into different books shared
     async function searchBooks(term: string | undefined) {
       setResultsLoading(true);
       setQueryResults([]);
 
       if (term) {
-        const response = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${term}`
-        );
-        const data = await response.json();
-        const books = data.items as Book[];
-
-        const queryBookIds: string[] = [];
-        books.forEach((book) => queryBookIds.push(book.id));
-
-        if (queryBookIds && queryBookIds.length > 0) {
-          const sharedUserIds: string[] = [];
-
-          const bookSnaphot = await getDocs(
-            query(
-              collection(db, `all-shared-books`),
-              where(documentId(), "in", queryBookIds)
-            ) as Query<Omit<AllSharedBook, "bookId">, DocumentData>
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${term}`
           );
-          bookSnaphot.forEach((book) => {
-            sharedUserIds.push(...book.data().userIds);
-          });
+          const data = await response.json();
+          const books = data.items as Book[] | undefined;
 
-          if (sharedUserIds && sharedUserIds.length > 0) {
-            const booksSharedUsers: User[] = [];
+          const queryBookIds: string[] = [];
+          books?.forEach((book) => queryBookIds.push(book.id));
 
-            const sharedUsersSnapshot = await getDocs(
+          if (queryBookIds && queryBookIds.length > 0) {
+            const sharedUserIds: string[] = [];
+            const sharedBooks: { bookName: string; userId: string[] }[] = [];
+
+            const bookSnaphot = await getDocs(
               query(
-                collection(db, `users`),
-                where(documentId(), "in", sharedUserIds)
-              ) as Query<User, DocumentData>
+                collection(db, `all-shared-books`),
+                where(documentId(), "in", queryBookIds)
+              ) as Query<Omit<AllSharedBook, "bookId">, DocumentData>
             );
-            sharedUsersSnapshot.forEach((user) => {
-              booksSharedUsers.push({ ...user.data() });
+            bookSnaphot.forEach((book) => {
+              sharedUserIds.push(...book.data().userIds);
+              sharedBooks.push({
+                bookName: book.data().bookName,
+                userId: book.data().userIds,
+              });
             });
 
-            setQueryResults(booksSharedUsers);
+            if (sharedUserIds && sharedUserIds.length > 0) {
+              const booksSharedUsers: User[] = [];
+
+              const sharedUsersSnapshot = await getDocs(
+                query(
+                  collection(db, `users`),
+                  where(documentId(), "in", sharedUserIds),
+                  where(documentId(), "!=", user?.uid)
+                ) as Query<User, DocumentData>
+              );
+              sharedUsersSnapshot.forEach((user) => {
+                booksSharedUsers.push({ ...user.data() });
+              });
+
+              setQueryResults(booksSharedUsers);
+            }
           }
+        } catch (error) {
+          console.log(error);
+          toast.error("Something went wrong");
+        } finally {
+          setResultsLoading(false);
         }
-        setResultsLoading(false);
       } else {
         setQueryResults([]);
         setResultsLoading(false);
@@ -115,13 +129,15 @@ function Actions({ friendId, userId }: ActionsProps) {
   return (
     <div className="flex gap-2 md:gap-4">
       <Button size="icon" asChild>
-        {/* <Link href={`/dashboard/chat/${formatChatId([userId, friendId])}`}> */}
-        <MessageCircleIcon className="size-5" />
-        {/* </Link> */}
+        <Link href={`/dashboard/chat/${formatChatId([userId, friendId])}`}>
+          <MessageCircleIcon className="size-5" />
+        </Link>
       </Button>
 
-      <Button variant="outline" size="icon">
-        <UserIcon className="size-5" />
+      <Button variant="outline" size="icon" asChild>
+        <Link href={`/dashboard/user/${friendId}`}>
+          <UserIcon className="size-5" />
+        </Link>
       </Button>
     </div>
   );

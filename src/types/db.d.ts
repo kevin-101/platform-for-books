@@ -30,5 +30,6 @@ type UserSharedBook = {
 
 type AllSharedBook = {
   bookId: string;
+  bookName: string;
   userIds: string[];
 };

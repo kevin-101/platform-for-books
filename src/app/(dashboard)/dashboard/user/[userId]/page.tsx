@@ -71,8 +71,10 @@ export default function UserProfilePage({
 
         <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-[2px]">
           {booksLoading
-            ? [...Array(7)].map(() => {
-                return <Skeleton className="aspect-square rounded-none" />;
+            ? [...Array(7)].map((_, i) => {
+                return (
+                  <Skeleton key={i} className="aspect-square rounded-none" />
+                );
               })
             : sharedBooks?.map((book) => {
                 return (

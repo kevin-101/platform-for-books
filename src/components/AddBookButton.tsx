@@ -34,6 +34,7 @@ import { Input } from "./ui/input";
 import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
+import LoadingComp from "./LoadingComp";
 
 type AddBookButtonProps = {
   className?: ClassValue;
@@ -41,20 +42,28 @@ type AddBookButtonProps = {
 };
 
 export default function AddBookButton({ className, user }: AddBookButtonProps) {
+  // for dialog
   const [dialogState, setDialogState] = useState<boolean>(false);
-  const [bookSelectState, setBookSelectState] = useState<boolean>(false);
+
+  // for the search input inside the dialog
   const [queryResults, setQueryResults] = useState<Book[] | undefined>();
+  const [resultsLoading, setResultsLoading] = useState<boolean>(false);
+
+  // for the book select button
+  const [bookSelectState, setBookSelectState] = useState<boolean>(false);
   const [selectedBook, setSelectedBook] = useState<
     { bookId: string; bookName: string } | undefined
   >();
+
+  // for the file select input
+  const bookImageRef = useRef<HTMLInputElement>(null);
   const [previewPath, setPreviewPath] = useState<
     string | ArrayBuffer | null | undefined
   >();
 
+  // for image upload
   const [uploadImage, uploadLoading, imageUploadSnapshot] = useUploadFile();
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-
-  const bookImageRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (imageUploadSnapshot) {
@@ -71,16 +80,25 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
   const handleSearch = useDebouncedCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       const query = e.target.value;
+      setResultsLoading(true);
 
       if (query && query.length > 0) {
-        const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${query}`
-        );
-        const data = await res.json();
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${query}`
+          );
+          const data = await res.json();
 
-        setQueryResults(data.items);
+          setQueryResults(data.items);
+        } catch (error) {
+          console.log(error);
+          toast.error("Something went wrong");
+        } finally {
+          setResultsLoading(false);
+        }
       } else {
         setQueryResults([]);
+        setResultsLoading(false);
       }
     },
     600
@@ -130,6 +148,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
               `all-shared-books/${selectedBook.bookId}`
             ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
             {
+              bookName: selectedBook.bookName,
               userIds: arrayUnion(user.uid),
             }
           );
@@ -184,7 +203,13 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-8">
-          <Popover open={bookSelectState} onOpenChange={setBookSelectState}>
+          <Popover
+            open={bookSelectState}
+            onOpenChange={(open) => {
+              setBookSelectState(open);
+              setQueryResults([]);
+            }}
+          >
             <PopoverTrigger asChild>
               <Button variant="outline" className="justify-between">
                 <span className="flex-1 w-32 text-start overflow-hidden text-ellipsis">
@@ -204,35 +229,39 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
                   onChange={(e) => handleSearch(e)}
                 />
 
-                {queryResults && queryResults.length > 0 ? (
-                  <ul className="flex flex-col gap-2 p-1 h-[250px] overflow-auto w-full bg-background">
-                    {queryResults.map((book) => {
-                      return (
-                        <li
-                          key={book.id}
-                          className="py-2 px-4 hover:bg-orange-100 rounded-md cursor-pointer"
-                          onClick={() => {
-                            setSelectedBook({
-                              bookId: book.id,
-                              bookName: book.volumeInfo.title,
-                            });
-                            setQueryResults([]);
-                            setBookSelectState(false);
-                          }}
-                        >
-                          {book.volumeInfo.title}
-                          {book.volumeInfo.authors &&
-                            book.volumeInfo.authors.length > 0 &&
-                            `, ${book.volumeInfo.authors[0]}`}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <p className="grid place-items-center h-20 font-medium text-muted-foreground">
-                    No matching books
-                  </p>
-                )}
+                <div className="grid place-items-center w-full min-h-20">
+                  {resultsLoading ? (
+                    <LoadingComp />
+                  ) : queryResults && queryResults.length > 0 ? (
+                    <ul className="flex flex-col gap-2 p-1 h-[250px] overflow-auto w-full bg-background">
+                      {queryResults.map((book) => {
+                        return (
+                          <li
+                            key={book.id}
+                            className="py-2 px-4 hover:bg-orange-100 rounded-md cursor-pointer"
+                            onClick={() => {
+                              setSelectedBook({
+                                bookId: book.id,
+                                bookName: book.volumeInfo.title,
+                              });
+                              setQueryResults([]);
+                              setBookSelectState(false);
+                            }}
+                          >
+                            {book.volumeInfo.title}
+                            {book.volumeInfo.authors &&
+                              book.volumeInfo.authors.length > 0 &&
+                              `, ${book.volumeInfo.authors[0]}`}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="font-medium text-muted-foreground">
+                      No matching books
+                    </p>
+                  )}
+                </div>
               </div>
             </PopoverContent>
           </Popover>
@@ -264,15 +293,15 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
 
           <div
             className={cn(
-              "flex flex-col items-center gap-2 w-full",
+              "flex items-center gap-2 w-full",
               !imageUploadSnapshot && "invisible"
             )}
           >
-            <span className="font-bold w-full text-end">{`${uploadProgress}%`}</span>
             <Progress
               value={uploadProgress}
-              className="w-full *:bg-orange-500"
+              className="flex-1 *:bg-orange-500"
             />
+            <span className="font-bold">{`${uploadProgress}%`}</span>
           </div>
         </div>
 
