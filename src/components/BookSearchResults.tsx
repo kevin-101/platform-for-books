@@ -36,6 +36,7 @@ export default function BookSearchResults({
       setResultsLoading(true);
       setQueryResults([]);
 
+      // execute only if query term is available
       if (term) {
         try {
           const response = await fetch(
@@ -47,9 +48,10 @@ export default function BookSearchResults({
           const queryBookIds: string[] = [];
           books?.forEach((book) => queryBookIds.push(book.id));
 
+          // execute if books id array not empty
           if (queryBookIds && queryBookIds.length > 0) {
             const sharedUserIds: string[] = [];
-            const sharedBooks: { bookName: string; userId: string[] }[] = [];
+            const sharedBooks: { bookName: string; userIds: string[] }[] = [];
 
             const bookSnaphot = await getDocs(
               query(
@@ -61,10 +63,11 @@ export default function BookSearchResults({
               sharedUserIds.push(...book.data().userIds);
               sharedBooks.push({
                 bookName: book.data().bookName,
-                userId: book.data().userIds,
+                userIds: book.data().userIds,
               });
             });
 
+            // execute if shared user ids array not empty
             if (sharedUserIds && sharedUserIds.length > 0) {
               const booksSharedUsers: User[] = [];
 
