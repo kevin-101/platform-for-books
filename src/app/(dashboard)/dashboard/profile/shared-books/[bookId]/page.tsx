@@ -13,16 +13,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { auth, db, storage } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import {
+  arrayRemove,
   deleteDoc,
   doc,
   DocumentData,
   DocumentReference,
+  updateDoc,
 } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 import { Loader2Icon } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
@@ -62,6 +63,9 @@ export default function SharedBookPage({
         await deleteDoc(
           doc(db, `shared-books/${user.uid}/book-details/${bookId}`)
         );
+        await updateDoc(doc(db, `all-shared-books/${sharedBook.bookId}`), {
+          userIds: arrayRemove(user.uid),
+        });
 
         toast.success("Book deleted");
         router.replace("/dashboard/profile");
