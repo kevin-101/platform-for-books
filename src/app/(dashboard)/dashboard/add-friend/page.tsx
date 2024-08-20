@@ -1,5 +1,6 @@
 import SearchField from "@/components/SearchField";
 import UserSearchResults from "@/components/UserSearchResults";
+import { cookies } from "next/headers";
 
 type AddFriendPageProps = {
   searchParams?: {
@@ -7,8 +8,23 @@ type AddFriendPageProps = {
   };
 };
 
-export default function AddFriendPage({ searchParams }: AddFriendPageProps) {
+export default async function AddFriendPage({
+  searchParams,
+}: AddFriendPageProps) {
   const email = searchParams?.q || "";
+  const idToken = cookies().get("idToken")?.value;
+  const domain = process.env.APP_DOMAIN;
+
+  const friendsRes = await fetch(`${domain}/api/friends`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+
+  if (!friendsRes.ok) {
+    throw new Error("Something went wrong");
+  }
+
+  const friends = (await friendsRes.json()).data as User[];
+  const friendIds = friends.map((friend) => friend.id);
 
   return (
     <div className="flex flex-col w-full gap-6 pt-8 px-4">
@@ -21,7 +37,7 @@ export default function AddFriendPage({ searchParams }: AddFriendPageProps) {
         <SearchField type="email" placeholder="Search for users" />
       </div>
 
-      <UserSearchResults email={email} />
+      <UserSearchResults email={email} friendIds={friendIds} />
     </div>
   );
 }

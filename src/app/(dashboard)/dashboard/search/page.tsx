@@ -1,5 +1,7 @@
 import BookSearchResults from "@/components/BookSearchResults";
+import LoadingComp from "@/components/LoadingComp";
 import SearchField from "@/components/SearchField";
+import { Suspense } from "react";
 
 type SearchPageProps = {
   searchParams?: {
@@ -23,7 +25,9 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
         <SearchField type="text" placeholder="Search for books" />
       </div>
 
-      <BookSearchResults searchTerm={query} />
+      <Suspense key={query} fallback={<LoadingComp />}>
+        <BookSearchResults searchTerm={query} />
+      </Suspense>
     </div>
   );
 }

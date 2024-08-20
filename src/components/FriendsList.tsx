@@ -2,24 +2,11 @@
 
 import { Button } from "./ui/button";
 import { EllipsisVerticalIcon, MessageCircleIcon, XIcon } from "lucide-react";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import {
-  DocumentData,
-  DocumentReference,
-  Query,
-  arrayRemove,
-  collection,
-  doc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import LoadingComp from "./LoadingComp";
-import ErrorComp from "./ErrorComp";
 import UserListItem from "./UserListItem";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +20,9 @@ import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { useAuthContext } from "./AuthProvider";
 
-type FriendsListProps = {};
+type FriendsListProps = {
+  friends: User[] | undefined;
+};
 
 type FriendsListActionsProps = {
   friend: User;
@@ -41,42 +30,10 @@ type FriendsListActionsProps = {
   removeFn: () => void;
 };
 
-export default function FriendsList({}: FriendsListProps) {
+export default function FriendsList({ friends }: FriendsListProps) {
   const [user] = useAuthContext();
-  const [friendIds, loading, error] = useDocumentData(
-    doc(db, `friends/${user?.uid}`) as DocumentReference<
-      { ids: string[] },
-      DocumentData
-    >
-  );
 
   const [searchText, setSearchText] = useState<string>("");
-  const [friends, setFriends] = useState<User[]>([]);
-
-  useEffect(() => {
-    async function getFriends() {
-      if (friendIds && friendIds.ids.length > 0) {
-        try {
-          const friendsSnapshot = await getDocs(
-            query(
-              collection(db, "users"),
-              where("id", "in", friendIds.ids)
-            ) as Query<User, DocumentData>
-          );
-
-          const frnds: User[] = [];
-          friendsSnapshot.forEach((frnd) => frnds.push(frnd.data()));
-          setFriends(frnds);
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        setFriends([]);
-      }
-    }
-
-    getFriends();
-  }, [friendIds]);
 
   async function removeFriend(friendId: string) {
     if (user) {
@@ -90,12 +47,6 @@ export default function FriendsList({}: FriendsListProps) {
         toast.error("Something went wrong. Try again");
       }
     }
-  }
-
-  if (error) {
-    console.log(error);
-
-    return <ErrorComp />;
   }
 
   return (
@@ -119,9 +70,7 @@ export default function FriendsList({}: FriendsListProps) {
         </div>
       </div>
 
-      {loading ? (
-        <LoadingComp />
-      ) : friends && friends.length > 0 ? (
+      {friends && friends.length > 0 ? (
         <ul className="flex flex-col gap-4 w-full">
           {friends
             .filter((friend) =>

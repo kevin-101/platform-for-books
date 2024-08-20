@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { GoogleAuthProvider, getRedirectResult } from "firebase/auth";
@@ -10,20 +9,12 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useSignInWithRedirect } from "@/hooks/use-signin-with-redirect";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useAuthContext } from "@/components/AuthProvider";
 
 export default function Page() {
   const router = useRouter();
 
-  const [user] = useAuthState(auth, {
-    onUserChanged: async (user) => {
-      if (user) {
-        const redir = await getRedirectResult(auth);
-        if (!redir) {
-          router.replace("/dashboard");
-        }
-      }
-    },
-  });
+  const [user] = useAuthContext();
   const googleProvider = new GoogleAuthProvider();
   const [signInWithGoogle, loading] = useSignInWithRedirect(
     auth,
@@ -36,12 +27,11 @@ export default function Page() {
     // this function takes care of the logic when
     // the signin redirects back to this page
     async function handleRedirect() {
-      try {
-        if (user) {
-          const result = await getRedirectResult(auth);
+      if (user) {
+        try {
           setRedirectLoading(true);
+          const result = await getRedirectResult(auth);
 
-          const idToken = await user.getIdToken();
           const userId = result?.user.uid;
           const dbUser = await getDoc(doc(db, `users/${userId}`));
 
@@ -55,17 +45,14 @@ export default function Page() {
             });
           }
 
-          const year = new Date().getFullYear();
-          const cookieExpiry = new Date(year + 1, 11).toUTCString();
-          document.cookie = `idToken=${idToken};expires=${cookieExpiry}`;
           setRedirectLoading(false);
           router.replace("/dashboard");
+        } catch (error) {
+          toast.error(`Something went wrong. Please try again`);
+          console.log(error);
+        } finally {
+          setRedirectLoading(false);
         }
-      } catch (error) {
-        toast.error(`Something went wrong. Please try again`);
-        console.log(error);
-      } finally {
-        setRedirectLoading(false);
       }
     }
 

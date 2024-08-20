@@ -1,44 +1,34 @@
-"use client";
-
-import { useAuthContext } from "@/components/AuthProvider";
-import ErrorComp from "@/components/ErrorComp";
-import LoadingComp from "@/components/LoadingComp";
-import { db } from "@/lib/firebase";
-import {
-  CollectionReference,
-  DocumentData,
-  collection,
-} from "firebase/firestore";
+import { adminAuth } from "@/lib/firebase-admin";
+import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 
-export default function ChatsPage() {
-  const [user] = useAuthContext();
-  const [chats, loading, error] = useCollectionData(
-    collection(db, `chats/${user?.uid}/chat-details`) as CollectionReference<
-      Chat,
-      DocumentData
-    >
-  );
+export default async function ChatsPage() {
+  const idToken = cookies().get("idToken")?.value;
+  const domain = process.env.APP_DOMAIN;
 
-  if (error) {
-    return <ErrorComp />;
+  const chatRes = await fetch(`${domain}/api/chats`, {
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+
+  if (!chatRes.ok) {
+    throw new Error(chatRes.statusText);
   }
 
-  if (loading) {
-    return <LoadingComp />;
-  }
+  const chats = (await chatRes.json()).data as Chat[];
+
+  let userId: string | undefined =
+    idToken && (await adminAuth?.verifyIdToken(idToken))?.uid;
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col items-center w-full">
       {chats ? (
         chats.map((chat) => {
           return (
             <Link
               key={chat.id}
               href={`/dashboard/chat/${chat.id}`}
-              className="flex items-center justify-between px-4 lg:px-6 py-4 gap-3 hover:bg-orange-100 transition-colors"
+              className="flex items-center justify-between w-full px-4 lg:px-6 py-4 gap-3 hover:bg-orange-100 transition-colors"
             >
               <div className="flex gap-4 w-2/3">
                 <div className="relative size-14 flex-shrink-0">
@@ -55,7 +45,7 @@ export default function ChatsPage() {
                   </p>
                   {chat.lastMessage && (
                     <p className="text-sm text-muted-foreground truncate">
-                      {chat.lastMessageUserId === user?.uid && `you: `}
+                      {chat.lastMessageUserId === userId && `you: `}
                       {chat.lastMessage}
                     </p>
                   )}
@@ -64,9 +54,11 @@ export default function ChatsPage() {
 
               {chat.timestamp && (
                 <span className="flex-shrink-0 text-sm text-muted-foreground">
-                  {chat.timestamp
-                    .toDate()
-                    .toLocaleTimeString("en-US", { timeStyle: "short" })}
+                  {
+                    chat.timestamp.seconds
+                    // .toDate()
+                    // .toLocaleTimeString("en-US", { timeStyle: "short" })
+                  }
                 </span>
               )}
             </Link>

@@ -12,8 +12,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const [user, loading, error] = useIdToken(auth, {
     onUserChanged: async (user) => {
+      if (user) {
+        let idToken = await user.getIdToken(true);
+        document.cookie = `idToken=${idToken};path=/`;
+      }
       if (!user) {
-        document.cookie = `idToken=;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+        document.cookie = `idToken=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/`;
         router.push("/login");
       }
     },

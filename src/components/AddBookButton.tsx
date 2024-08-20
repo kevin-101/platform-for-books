@@ -12,7 +12,6 @@ import {
 } from "./ui/dialog";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useUploadFile } from "react-firebase-hooks/storage";
-import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
 import {
   addDoc,
@@ -35,10 +34,11 @@ import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import LoadingComp from "./LoadingComp";
+import { revalidateProfile } from "@/app/(dashboard)/dashboard/friends/actions";
 
 type AddBookButtonProps = {
   className?: ClassValue;
-  user: AuthUser | null | undefined;
+  user: User | undefined;
 };
 
 export default function AddBookButton({ className, user }: AddBookButtonProps) {
@@ -124,7 +124,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
       try {
         const imageRef = ref(
           storage,
-          `${user.uid}/${selectedBook.bookName}.${
+          `${user.id}/${selectedBook.bookName}.${
             imageFiles[0].type.split("/")[1]
           }`
         );
@@ -132,7 +132,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
         const uploadedImageUrl = await getDownloadURL(imageRef);
         setUploadProgress(0);
 
-        await addDoc(collection(db, `shared-books/${user.uid}/book-details`), {
+        await addDoc(collection(db, `shared-books/${user.id}/book-details`), {
           bookId: selectedBook.bookId,
           bookName: selectedBook.bookName,
           bookImageUrl: uploadedImageUrl,
@@ -149,7 +149,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
             ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
             {
               bookName: selectedBook.bookName,
-              userIds: arrayUnion(user.uid),
+              userIds: arrayUnion(user.id),
             }
           );
         } else {
@@ -159,12 +159,13 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
               `all-shared-books/${selectedBook.bookId}`
             ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
             {
-              userIds: arrayUnion(user.uid),
+              userIds: arrayUnion(user.id),
             }
           );
         }
 
         setDialogState(false);
+        await revalidateProfile();
         toast.success("Book added successfully");
       } catch (error) {
         setDialogState(false);

@@ -3,56 +3,41 @@
 import { CheckCircleIcon, Loader2Icon, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuthContext } from "./AuthProvider";
-import { ChangeEvent, useEffect, useState } from "react";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import {
-  arrayUnion,
-  collection,
-  doc,
-  DocumentData,
-  DocumentReference,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import UserListItem from "./UserListItem";
+import LoadingComp from "./LoadingComp";
 
 type UserSearchResultsProps = {
   email: string | undefined;
+  friendIds: string[] | undefined;
 };
 
-export default function UserSearchResults({ email }: UserSearchResultsProps) {
+export default function UserSearchResults({
+  email,
+  friendIds,
+}: UserSearchResultsProps) {
   const [user] = useAuthContext();
   const [matchingUsers, setMatchingUsers] = useState<User[]>([]);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [reqSendLoading, setReqsendLoading] = useState<boolean>(false);
-
-  const [friends] = useDocumentData(
-    doc(db, `friends/${user?.uid}`) as DocumentReference<
-      { ids: string[] },
-      DocumentData
-    >
-  );
 
   useEffect(() => {
     async function searchUser(qry: string | undefined) {
       if (qry) {
         try {
-          const q = query(
-            collection(db, "users"),
-            where("email", "==", qry),
-            where("email", "!=", user?.email)
-          );
-          const friend = await getDocs(q);
-          const users: User[] = [];
-          friend.forEach((frnd) => users.push(frnd.data() as User));
+          setSearchLoading(true);
+
+          const usersRes = await fetch(`/api/users?email=${qry}`);
+          const users: User[] = (await usersRes.json()).data as User[];
+
           setMatchingUsers(users);
         } catch (error) {
           console.error(error);
+        } finally {
+          setSearchLoading(false);
         }
       } else {
         setMatchingUsers([]);
@@ -93,13 +78,11 @@ export default function UserSearchResults({ email }: UserSearchResultsProps) {
     }
   }
 
-  return (
+  return searchLoading ? (
+    <LoadingComp />
+  ) : (
     <div className="flex flex-col w-full gap-2 items-center">
-      {matchingUsers.length === 0 ? (
-        <h1 className="text-lg font-medium text-muted-foreground text-center">
-          No Matching Users Found
-        </h1>
-      ) : (
+      {matchingUsers && matchingUsers.length > 0 ? (
         <ul className="flex flex-col w-full gap-2">
           {matchingUsers.map((user, _) => {
             return (
@@ -110,13 +93,17 @@ export default function UserSearchResults({ email }: UserSearchResultsProps) {
                   <AddActions
                     sendFriendRequest={() => sendFriendRequest(user)}
                     reqSendLoading={reqSendLoading}
-                    isFriend={friends?.ids.includes(user.id) as boolean}
+                    isFriend={friendIds?.includes(user.id) as boolean}
                   />
                 }
               />
             );
           })}
         </ul>
+      ) : (
+        <h1 className="text-lg font-medium text-muted-foreground text-center">
+          No Matching Users Found
+        </h1>
       )}
     </div>
   );

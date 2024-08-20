@@ -1,116 +1,51 @@
-"use client";
-
-import { db } from "@/lib/firebase";
-import {
-  collection,
-  DocumentData,
-  documentId,
-  getDocs,
-  Query,
-  query,
-  where,
-} from "firebase/firestore";
-import { Loader2, MessageCircleIcon, UserIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { MessageCircleIcon, UserIcon } from "lucide-react";
 import UserListItem from "./UserListItem";
 import { Button } from "./ui/button";
 import { formatChatId } from "@/lib/utils";
-import { useAuthContext } from "./AuthProvider";
 import Link from "next/link";
-import { toast } from "sonner";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebase-admin";
 
 type BookSearchResultsProps = {
   searchTerm: string | undefined;
 };
 
-export default function BookSearchResults({
+export default async function BookSearchResults({
   searchTerm,
 }: BookSearchResultsProps) {
-  const [user] = useAuthContext();
-  const [queryResults, setQueryResults] = useState<User[] | undefined>();
-  const [resultsLoading, setResultsLoading] = useState<boolean>(false);
+  const idToken = cookies().get("idToken")?.value;
+  const userId: string | undefined =
+    idToken && (await adminAuth?.verifyIdToken(idToken))?.uid;
 
-  useEffect(() => {
-    // TODO: categorize the data into different books shared
-    async function searchBooks(term: string | undefined) {
-      setResultsLoading(true);
-      setQueryResults([]);
+  let queryResults: User[] | undefined;
 
-      // execute only if query term is available
-      if (term) {
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${term}`
-          );
-          const data = await response.json();
-          const books = data.items as Book[] | undefined;
-
-          const queryBookIds: string[] = [];
-          books?.forEach((book) => queryBookIds.push(book.id));
-
-          // execute if books id array not empty
-          if (queryBookIds && queryBookIds.length > 0) {
-            const sharedUserIds: string[] = [];
-            const sharedBooks: { bookName: string; userIds: string[] }[] = [];
-
-            const bookSnaphot = await getDocs(
-              query(
-                collection(db, `all-shared-books`),
-                where(documentId(), "in", queryBookIds)
-              ) as Query<Omit<AllSharedBook, "bookId">, DocumentData>
-            );
-            bookSnaphot.forEach((book) => {
-              sharedUserIds.push(...book.data().userIds);
-              sharedBooks.push({
-                bookName: book.data().bookName,
-                userIds: book.data().userIds,
-              });
-            });
-
-            // execute if shared user ids array not empty
-            if (sharedUserIds && sharedUserIds.length > 0) {
-              const booksSharedUsers: User[] = [];
-
-              const sharedUsersSnapshot = await getDocs(
-                query(
-                  collection(db, `users`),
-                  where(documentId(), "in", sharedUserIds),
-                  where(documentId(), "!=", user?.uid)
-                ) as Query<User, DocumentData>
-              );
-              sharedUsersSnapshot.forEach((user) => {
-                booksSharedUsers.push({ ...user.data() });
-              });
-
-              setQueryResults(booksSharedUsers);
-            }
-          }
-        } catch (error) {
-          console.log(error);
-          toast.error("Something went wrong");
-        } finally {
-          setResultsLoading(false);
-        }
-      } else {
-        setQueryResults([]);
-        setResultsLoading(false);
+  if (searchTerm) {
+    const userRes = await fetch(
+      `${process.env.APP_DOMAIN}/api/books?query=${searchTerm}`,
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
       }
-    }
+    );
 
-    searchBooks(searchTerm);
-  }, [searchTerm]);
+    if (!userRes.ok) {
+      throw new Error(userRes.statusText);
+    }
+    queryResults = (await userRes.json()).data as User[];
+  } else {
+    queryResults = [];
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full items-center">
-      {resultsLoading ? (
-        <Loader2 className="size-12 animate-spin text-orange-500" />
-      ) : queryResults && queryResults.length > 0 ? (
+      {queryResults && queryResults.length > 0 ? (
         queryResults.map((friend) => {
           return (
             <UserListItem
               key={friend.id}
               user={friend}
-              actions={<Actions friendId={friend.id} userId={user?.uid} />}
+              actions={<Actions friendId={friend.id} userId={userId} />}
             />
           );
         })
