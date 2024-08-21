@@ -37,6 +37,10 @@ export async function GET(req: NextRequest) {
     const bookRes = await fetch(
       `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${query}`
     );
+
+    if (!bookRes.ok) {
+      throw new Error(bookRes.statusText);
+    }
     const books = (await bookRes.json()).items as Book[];
     const queryBookIds = books.map((book) => book.id);
 
@@ -46,12 +50,14 @@ export async function GET(req: NextRequest) {
         .where(FieldPath.documentId(), "in", queryBookIds)
         .get()) as QuerySnapshot<Omit<AllSharedBook, "bookId">, DocumentData>;
 
-      const userIds = bookSnapshot.docs.map((book) => book.data().userIds);
+      const userIds = bookSnapshot.docs
+        .map((book) => book.data().userIds)
+        .flat();
 
       if (userIds && userIds.length > 0) {
         const userSnapshot = await adminDB
           .collection("users")
-          .where("id", "in", userIds.flat())
+          .where("id", "in", userIds)
           .where("id", "!=", userId)
           .get();
         const users = userSnapshot.docs.map((user) => user.data() as User);

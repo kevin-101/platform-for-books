@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
     return Response.json("Not authorized", { status: 401 });
   }
 
+  // TODO: fix timestamp returned as response
   try {
     const chatsSnapshot = await adminDB
       .collection(`chats/${userId}/chat-details`)
