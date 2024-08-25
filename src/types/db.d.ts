@@ -18,6 +18,10 @@ type Chat = {
   chatImage: string;
   lastMessage: string | null;
   lastMessageUserId: string | null;
+  timestamp: string;
+};
+
+type DbChat = Omit<Chat, "timestamp"> & {
   timestamp: import("firebase/firestore").Timestamp;
 };
 

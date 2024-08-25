@@ -54,11 +54,9 @@ export default async function ChatsPage() {
 
               {chat.timestamp && (
                 <span className="flex-shrink-0 text-sm text-muted-foreground">
-                  {
-                    chat.timestamp.seconds
-                    // .toDate()
-                    // .toLocaleTimeString("en-US", { timeStyle: "short" })
-                  }
+                  {new Date(chat.timestamp).toLocaleTimeString("en-US", {
+                    timeStyle: "short",
+                  })}
                 </span>
               )}
             </Link>
