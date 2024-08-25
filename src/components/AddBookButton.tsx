@@ -34,7 +34,7 @@ import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import LoadingComp from "./LoadingComp";
-import { revalidateProfile } from "@/app/(dashboard)/dashboard/friends/actions";
+import { revalidateProfile } from "@/app/(dashboard)/dashboard/profile/actions";
 
 type AddBookButtonProps = {
   className?: ClassValue;

@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { EllipsisVerticalIcon, MessageCircleIcon, XIcon } from "lucide-react";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import LoadingComp from "./LoadingComp";
 import UserListItem from "./UserListItem";
 import { useState } from "react";
 import {

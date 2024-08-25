@@ -28,8 +28,8 @@ export default async function ProfilePage() {
           Your shared books
         </h2>
 
-        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-[2px] md:px-4">
-          <AddBookButton user={user} className="aspect-square" />
+        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">
+          <AddBookButton user={user} className="aspect-square rounded-md" />
 
           <Suspense fallback={<BooksLoading />}>
             <SharedBooks user={user} />

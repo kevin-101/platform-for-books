@@ -29,6 +29,8 @@ export default function SearchField({ ...props }: SearchFieldProps) {
           params.delete("q");
         }
         replace(`${pathname}?${params.toString()}`);
+      } else {
+        replace(pathname);
       }
     }
 

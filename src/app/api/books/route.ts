@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
     }
     const books = (await bookRes.json()).items as Book[];
     const queryBookIds = books.map((book) => book.id);
+    console.log(`Book ids: \n ${queryBookIds}`);
 
     if (queryBookIds && queryBookIds.length > 0) {
       const bookSnapshot = (await adminDB

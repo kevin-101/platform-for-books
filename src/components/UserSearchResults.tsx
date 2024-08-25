@@ -30,7 +30,7 @@ export default function UserSearchResults({
         try {
           setSearchLoading(true);
 
-          const usersRes = await fetch(`/api/users?email=${qry}`);
+          const usersRes = await fetch(`/api/users?email=${qry}&name=${qry}`);
           const users: User[] = (await usersRes.json()).data as User[];
 
           setMatchingUsers(users);

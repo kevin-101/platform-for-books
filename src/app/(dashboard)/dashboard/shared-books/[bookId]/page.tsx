@@ -37,6 +37,7 @@ type SharedBookPageProps = {
   };
 };
 
+// TODO: make edit and delete buttons visible only on books shared by the user
 export default function SharedBookPage({
   params: { bookId },
 }: SharedBookPageProps) {

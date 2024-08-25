@@ -29,7 +29,7 @@ export default async function SharedBooks({ user }: SharedBooksProps) {
             src={book.bookImageUrl}
             alt={`${book.bookName} image`}
             fill
-            className="object-cover group-hover:opacity-85 transition-opacity"
+            className="object-cover group-hover:opacity-85 transition-opacity rounded-md"
           />
         </Link>
       );

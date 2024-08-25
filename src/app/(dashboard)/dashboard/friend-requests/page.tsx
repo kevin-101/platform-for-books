@@ -70,7 +70,7 @@ export default function FriendRequestsPage() {
         <h1 className="text-3xl font-bold">Friend Requests</h1>
       </div>
       {friendRequests?.length === 0 ? (
-        <h2 className="text-xl font-bold text-muted-foreground">
+        <h2 className="text-xl font-medium text-muted-foreground">
           No friend requests
         </h2>
       ) : (
