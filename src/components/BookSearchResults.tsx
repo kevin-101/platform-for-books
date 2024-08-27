@@ -37,6 +37,7 @@ export default async function BookSearchResults({
     queryResults = [];
   }
 
+  // TODO: Categorize the returned users by book
   return (
     <div className="flex flex-col gap-4 w-full items-center">
       {queryResults && queryResults.length > 0 ? (
