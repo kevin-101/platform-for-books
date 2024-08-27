@@ -87,6 +87,10 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${query}`
           );
+
+          if (!res.ok) {
+            throw new Error(res.statusText);
+          }
           const data = await res.json();
 
           setQueryResults(data.items);

@@ -18,6 +18,7 @@ import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { useAuthContext } from "./AuthProvider";
+import { revalidateFriends } from "@/app/(dashboard)/dashboard/friends/actions";
 
 type FriendsListProps = {
   friends: User[] | undefined;
@@ -40,6 +41,7 @@ export default function FriendsList({ friends }: FriendsListProps) {
         await updateDoc(doc(db, `friends/${user.uid}`), {
           ids: arrayRemove(friendId),
         });
+        revalidateFriends();
         toast.success("Friend removed");
       } catch (error) {
         console.log(error);
