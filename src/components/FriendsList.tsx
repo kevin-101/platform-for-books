@@ -2,8 +2,6 @@
 
 import { Button } from "./ui/button";
 import { EllipsisVerticalIcon, MessageCircleIcon, XIcon } from "lucide-react";
-import { arrayRemove, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import UserListItem from "./UserListItem";
 import { useState } from "react";
 import {
@@ -18,7 +16,7 @@ import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { useAuthContext } from "./AuthProvider";
-import { revalidateFriends } from "@/app/(dashboard)/dashboard/friends/actions";
+import { removeFriend } from "@/lib/firebase-actions/removeFriend";
 
 type FriendsListProps = {
   friends: User[] | undefined;
@@ -35,13 +33,11 @@ export default function FriendsList({ friends }: FriendsListProps) {
 
   const [searchText, setSearchText] = useState<string>("");
 
-  async function removeFriend(friendId: string) {
+  async function handleRemoveFriend(friendId: string) {
     if (user) {
       try {
-        await updateDoc(doc(db, `friends/${user.uid}`), {
-          ids: arrayRemove(friendId),
-        });
-        revalidateFriends();
+        await removeFriend(user.uid, friendId);
+
         toast.success("Friend removed");
       } catch (error) {
         console.log(error);
@@ -88,7 +84,7 @@ export default function FriendsList({ friends }: FriendsListProps) {
                     <FriendsListActions
                       friend={friend}
                       user={user}
-                      removeFn={() => removeFriend(friend.id)}
+                      removeFn={() => handleRemoveFriend(friend.id)}
                     />
                   }
                 />

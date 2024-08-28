@@ -1,11 +1,13 @@
 import { adminDB } from "@/lib/firebase-admin";
+import { FieldPath } from "firebase-admin/firestore";
 import { type NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("id");
+  const bookId = req.nextUrl.searchParams.get("bookId");
 
-  if (!userId) {
-    return Response.json("User ID not provided", { status: 400 });
+  if (!userId && !bookId) {
+    return Response.json("User ID nor Book ID provided", { status: 400 });
   }
 
   if (!adminDB) {
@@ -15,21 +17,68 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const bookSnapshot = await adminDB
-      .collection(`shared-books/${userId}/book-details`)
-      .get();
-    if (bookSnapshot.size > 0) {
-      const sharedBooks = bookSnapshot.docs.map((book) => {
-        return { bookDocId: book.id, ...book.data() } as UserSharedBook;
-      });
+    if (bookId) {
+      const bookSnapshot = await adminDB
+        .collection(`shared-books`)
+        .doc(bookId)
+        .get();
+
+      if (!bookSnapshot.exists) {
+        return Response.json(
+          { message: "No books found", data: [] },
+          { status: 200 }
+        );
+      }
+
+      const sharedBook = bookSnapshot.data();
+
+      return Response.json(
+        { message: "Query successful", data: sharedBook },
+        { status: 200 }
+      );
+    }
+
+    if (userId) {
+      const bookSnapshot = await adminDB
+        .collection(`user-shared-books`)
+        .doc(userId)
+        .get();
+
+      if (!bookSnapshot.exists) {
+        return Response.json(
+          { message: "No books found", data: [] },
+          { status: 200 }
+        );
+      }
+
+      const sharedBookIds = bookSnapshot.data() as { bookIds: string[] };
+
+      const sharedBookSnapshot = (await adminDB
+        .collection(`shared-books`)
+        .where(FieldPath.documentId(), "in", sharedBookIds.bookIds)
+        .get()) as FirebaseFirestore.QuerySnapshot<
+        Omit<UserSharedBook, "bookDocId">,
+        FirebaseFirestore.DocumentData
+      >;
+
+      if (sharedBookSnapshot.empty) {
+        return Response.json(
+          { message: "No books found", data: [] },
+          { status: 200 }
+        );
+      }
+
+      const sharedBooks: UserSharedBook[] = sharedBookSnapshot.docs.map(
+        (book) => {
+          return {
+            bookDocId: book.id,
+            ...book.data(),
+          };
+        }
+      );
 
       return Response.json(
         { message: "Query successful", data: sharedBooks },
-        { status: 200 }
-      );
-    } else {
-      return Response.json(
-        { message: "No books found", data: [] },
         { status: 200 }
       );
     }

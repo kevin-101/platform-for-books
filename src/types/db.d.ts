@@ -30,6 +30,7 @@ type UserSharedBook = {
   bookId: string;
   bookName: string;
   bookImageUrl: string;
+  userId: string;
 };
 
 type AllSharedBook = {

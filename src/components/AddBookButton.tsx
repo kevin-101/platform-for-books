@@ -13,18 +13,7 @@ import {
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useUploadFile } from "react-firebase-hooks/storage";
 import { toast } from "sonner";
-import {
-  addDoc,
-  arrayUnion,
-  collection,
-  doc,
-  DocumentData,
-  DocumentReference,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { db, storage } from "@/lib/firebase";
+import { storage } from "@/lib/firebase";
 import { getDownloadURL, ref } from "firebase/storage";
 import { ChevronsUpDownIcon, Loader2Icon, PlusIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -34,7 +23,7 @@ import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import LoadingComp from "./LoadingComp";
-import { revalidateProfile } from "@/app/(dashboard)/dashboard/profile/actions";
+import { addBook } from "@/lib/firebase-actions/addBook";
 
 type AddBookButtonProps = {
   className?: ClassValue;
@@ -136,40 +125,9 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
         const uploadedImageUrl = await getDownloadURL(imageRef);
         setUploadProgress(0);
 
-        await addDoc(collection(db, `shared-books/${user.id}/book-details`), {
-          bookId: selectedBook.bookId,
-          bookName: selectedBook.bookName,
-          bookImageUrl: uploadedImageUrl,
-        });
-
-        const sharedBookDoc = await getDoc(
-          doc(db, `all-shared-books/${selectedBook.bookId}`)
-        );
-        if (!sharedBookDoc.exists()) {
-          await setDoc(
-            doc(
-              db,
-              `all-shared-books/${selectedBook.bookId}`
-            ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
-            {
-              bookName: selectedBook.bookName,
-              userIds: arrayUnion(user.id),
-            }
-          );
-        } else {
-          await updateDoc(
-            doc(
-              db,
-              `all-shared-books/${selectedBook.bookId}`
-            ) as DocumentReference<Omit<AllSharedBook, "bookId">, DocumentData>,
-            {
-              userIds: arrayUnion(user.id),
-            }
-          );
-        }
+        await addBook(selectedBook, user, uploadedImageUrl);
 
         setDialogState(false);
-        await revalidateProfile();
         toast.success("Book added successfully");
       } catch (error) {
         setDialogState(false);
