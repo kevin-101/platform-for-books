@@ -5,7 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import SharedBooks from "@/components/SharedBooks";
 import dynamic from "next/dynamic";
 
-const AddBookButton = dynamic(() => import("@/components/AddBookButton"));
+const AddBookButton = dynamic(() => import("@/components/AddBookButton"), {
+  ssr: false,
+});
 
 export default async function ProfilePage() {
   const idToken = cookies().get("idToken")?.value;

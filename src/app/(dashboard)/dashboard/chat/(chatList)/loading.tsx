@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ChatLoading() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       {[...Array(5)].map((_, i) => {
         return (
           <div

@@ -1,9 +1,11 @@
 import { adminAuth } from "@/lib/firebase-admin";
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
+import ChatLoading from "./loading";
 
 const ChatList = dynamic(() => import("@/components/ChatList"), {
-  loading: () => <h1 className="text-xl font-bold">No chats</h1>,
+  loading: () => <ChatLoading />,
+  ssr: false,
 });
 
 export default async function ChatsPage() {

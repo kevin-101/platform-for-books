@@ -1,8 +1,10 @@
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
+import { FriendsListLoading } from "./loading";
 
 const FriendsList = dynamic(() => import("@/components/FriendsList"), {
-  loading: () => <h1 className="text-xl font-bold">No friends</h1>,
+  loading: () => <FriendsListLoading />,
+  ssr: false,
 });
 
 export default async function FriendsPage() {

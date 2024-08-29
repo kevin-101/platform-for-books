@@ -11,6 +11,7 @@ const SearchField = dynamic(() => import("@/components/SearchField"), {
       <div className="invisible h-10 w-16" />
     </div>
   ),
+  ssr: false,
 });
 
 type SearchPageProps = {
