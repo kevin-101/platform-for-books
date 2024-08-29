@@ -1,6 +1,25 @@
-import SearchField from "@/components/SearchField";
-import UserSearchResults from "@/components/UserSearchResults";
+import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
+
+const SearchField = dynamic(() => import("@/components/SearchField"), {
+  loading: () => (
+    <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2">
+      <Skeleton className="w-full h-10" />
+      <div className="invisible h-10 w-16" />
+    </div>
+  ),
+});
+const UserSearchResults = dynamic(
+  () => import("@/components/UserSearchResults"),
+  {
+    loading: () => (
+      <h1 className="text-lg font-medium text-muted-foreground text-center">
+        No Matching Users Found
+      </h1>
+    ),
+  }
+);
 
 type AddFriendPageProps = {
   searchParams?: {

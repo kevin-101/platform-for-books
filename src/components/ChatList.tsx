@@ -1,5 +1,6 @@
 "use client";
 
+import { Timestamp } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,9 +40,14 @@ export default function ChatList({ userId, chats }: ChatListProps) {
 
           {chat.timestamp && (
             <span className="flex-shrink-0 text-sm text-muted-foreground">
-              {new Date(chat.timestamp).toLocaleTimeString("en-US", {
-                timeStyle: "short",
-              })}
+              {new Timestamp(
+                chat.timestamp._seconds,
+                chat.timestamp._nanoseconds
+              )
+                .toDate()
+                .toLocaleTimeString("en-US", {
+                  timeStyle: "short",
+                })}
             </span>
           )}
         </Link>

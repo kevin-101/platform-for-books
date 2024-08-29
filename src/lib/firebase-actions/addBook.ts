@@ -13,7 +13,6 @@ export async function addBook(
     throw new Error("Cannot connect to database");
   }
 
-  // TODO: maybe make the doc ids unique and userIds be just a string
   const sharedBook = await adminDB.collection(`shared-books`).add({
     bookId: selectedBook.bookId,
     bookName: selectedBook.bookName,

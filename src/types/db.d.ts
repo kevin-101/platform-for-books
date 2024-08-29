@@ -18,11 +18,7 @@ type Chat = {
   chatImage: string;
   lastMessage: string | null;
   lastMessageUserId: string | null;
-  timestamp: string;
-};
-
-type DbChat = Omit<Chat, "timestamp"> & {
-  timestamp: import("firebase/firestore").Timestamp;
+  timestamp: { _seconds: number; _nanoseconds: number };
 };
 
 type UserSharedBook = {
@@ -33,8 +29,7 @@ type UserSharedBook = {
   userId: string;
 };
 
-type AllSharedBook = {
-  bookId: string;
+type SharedBookUsers = {
   bookName: string;
-  userIds: string[];
+  users: User[];
 };

@@ -1,9 +1,11 @@
 import { Suspense } from "react";
-import AddBookButton from "@/components/AddBookButton";
 import ProfileHeader from "@/components/ProfileHeader";
 import { cookies } from "next/headers";
 import { Skeleton } from "@/components/ui/skeleton";
 import SharedBooks from "@/components/SharedBooks";
+import dynamic from "next/dynamic";
+
+const AddBookButton = dynamic(() => import("@/components/AddBookButton"));
 
 export default async function ProfilePage() {
   const idToken = cookies().get("idToken")?.value;
@@ -41,7 +43,7 @@ export default async function ProfilePage() {
 }
 
 export function BooksLoading() {
-  return [...Array(4)].map((_, i) => {
+  return [...Array(3)].map((_, i) => {
     return <Skeleton key={i} className="aspect-square" />;
   });
 }

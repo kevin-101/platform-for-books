@@ -48,27 +48,34 @@ export async function GET(req: NextRequest) {
     // TODO: Categorize users by book
     if (queryBookIds && queryBookIds.length > 0) {
       const bookSnapshot = (await adminDB
-        .collection(`all-shared-books`)
-        .where(FieldPath.documentId(), "in", queryBookIds)
-        .get()) as QuerySnapshot<Omit<AllSharedBook, "bookId">, DocumentData>;
+        .collection(`shared-books`)
+        .where("bookId", "in", queryBookIds)
+        .get()) as QuerySnapshot<
+        Omit<UserSharedBook, "bookDocId">,
+        DocumentData
+      >;
 
-      const userIds = bookSnapshot.docs
-        .map((book) => book.data().userIds)
-        .flat();
-
-      if (userIds && userIds.length > 0) {
-        const userSnapshot = await adminDB
-          .collection("users")
-          .where("id", "in", userIds)
-          .where("id", "!=", userId)
-          .get();
-        const users = userSnapshot.docs.map((user) => user.data() as User);
-
+      if (bookSnapshot.empty) {
         return Response.json(
-          { message: "Query successful", data: users },
+          { message: "No users with the books you are looking for", data: [] },
           { status: 200 }
         );
       }
+
+      const userIds = bookSnapshot.docs.map((book) => book.data().userId);
+      const userSnapshot = await adminDB
+        .collection("users")
+        .where("id", "in", userIds)
+        .where("id", "!=", userId)
+        .get();
+      const users = userSnapshot.docs.map((user) => user.data() as User);
+
+      console.log(userIds);
+
+      return Response.json(
+        { message: "Query successful", data: users },
+        { status: 200 }
+      );
     }
 
     return Response.json(

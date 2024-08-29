@@ -28,14 +28,9 @@ export async function GET(req: NextRequest) {
     // have to serialize the timestamp returned
     const chatsSnapshot = (await adminDB
       .collection(`chats/${userId}/chat-details`)
-      .get()) as QuerySnapshot<DbChat, DocumentData>;
+      .get()) as QuerySnapshot<Chat, DocumentData>;
 
-    const chats: Chat[] = chatsSnapshot.docs.map((chat) => {
-      return {
-        ...chat.data(),
-        timestamp: chat.data().timestamp.toDate().toISOString(),
-      };
-    });
+    const chats: Chat[] = chatsSnapshot.docs.map((chat) => chat.data());
 
     if (chats && chats.length > 0) {
       return Response.json(

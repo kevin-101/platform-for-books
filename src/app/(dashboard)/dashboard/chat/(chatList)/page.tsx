@@ -1,6 +1,10 @@
-import ChatList from "@/components/ChatList";
 import { adminAuth } from "@/lib/firebase-admin";
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
+
+const ChatList = dynamic(() => import("@/components/ChatList"), {
+  loading: () => <h1 className="text-xl font-bold">No chats</h1>,
+});
 
 export default async function ChatsPage() {
   const idToken = cookies().get("idToken")?.value;

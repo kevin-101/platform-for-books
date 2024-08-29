@@ -1,5 +1,9 @@
-import FriendsList from "@/components/FriendsList";
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
+
+const FriendsList = dynamic(() => import("@/components/FriendsList"), {
+  loading: () => <h1 className="text-xl font-bold">No friends</h1>,
+});
 
 export default async function FriendsPage() {
   const idToken = cookies().get("idToken")?.value;
