@@ -17,7 +17,7 @@ export default async function BookSearchResults({
   const userId: string | undefined =
     idToken && (await adminAuth?.verifyIdToken(idToken))?.uid;
 
-  let queryResults: User[] | undefined;
+  let queryResults: { bookName: string; users: User[] }[] | undefined;
 
   if (searchTerm) {
     const userRes = await fetch(
@@ -32,22 +32,35 @@ export default async function BookSearchResults({
     if (!userRes.ok) {
       throw new Error(userRes.statusText);
     }
-    queryResults = (await userRes.json()).data as User[];
+    queryResults = (await userRes.json()).data as {
+      bookName: string;
+      users: User[];
+    }[];
   } else {
     queryResults = [];
   }
 
-  // TODO: Categorize the returned users by book
   return (
     <div className="flex flex-col gap-4 w-full items-center">
       {queryResults && queryResults.length > 0 ? (
-        queryResults.map((friend) => {
+        queryResults.map((result) => {
           return (
-            <UserListItem
-              key={friend.id}
-              user={friend}
-              actions={<Actions friendId={friend.id} userId={userId} />}
-            />
+            <div className="flex flex-col gap-8 w-full">
+              <div className="relative w-full">
+                <div className="w-full border-b border-orange-200" />
+                <h3 className="font-bold absolute px-3 -translate-y-1/2 bg-background left-1/2 -translate-x-1/2">
+                  {result.bookName}
+                </h3>
+              </div>
+
+              {result.users.map((user) => (
+                <UserListItem
+                  key={user.id}
+                  user={user}
+                  actions={<Actions friendId={user.id} userId={userId} />}
+                />
+              ))}
+            </div>
           );
         })
       ) : (

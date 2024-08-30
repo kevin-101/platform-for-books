@@ -75,8 +75,8 @@ export default function SharedBook({
       </div>
 
       <div className="flex flex-col w-full h-full gap-4 bg-orange-50">
-        <div className="flex gap-4 justify-start items-center py-2 xl:px-4 border-b border-orange-200">
-          <div className="relative size-10">
+        <div className="flex gap-4 justify-start items-center order-first xl:order-none py-2 xl:px-4 border-b border-orange-200">
+          <div className="relative size-8">
             <Image
               src={user?.photoURL!}
               alt={`${user?.displayName} iamge`}
@@ -85,7 +85,7 @@ export default function SharedBook({
             />
           </div>
 
-          <h2 className="text-xl font-bold">{user?.displayName}</h2>
+          <h2 className="text-lg font-bold">{user?.displayName}</h2>
         </div>
 
         <form className="flex-1 flex flex-col justify-center gap-1 xl:px-4 w-full">

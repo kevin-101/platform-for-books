@@ -1,10 +1,24 @@
 import { adminAuth, adminDB } from "@/lib/firebase-admin";
 import {
-  FieldPath,
   type DocumentData,
   type QuerySnapshot,
 } from "firebase-admin/firestore";
 import { type NextRequest } from "next/server";
+
+function getUniqueArray(a: string[]) {
+  var seen: any = {};
+  var out = [];
+  var len = a.length;
+  var j = 0;
+  for (var i = 0; i < len; i++) {
+    var item = a[i];
+    if (seen[item] !== 1) {
+      seen[item] = 1;
+      out[j++] = item;
+    }
+  }
+  return out;
+}
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("query");
@@ -43,9 +57,7 @@ export async function GET(req: NextRequest) {
     }
     const books = (await bookRes.json()).items as Book[];
     const queryBookIds = books.map((book) => book.id);
-    console.log(`Book ids: \n ${queryBookIds}`);
 
-    // TODO: Categorize users by book
     if (queryBookIds && queryBookIds.length > 0) {
       const bookSnapshot = (await adminDB
         .collection(`shared-books`)
@@ -62,18 +74,51 @@ export async function GET(req: NextRequest) {
         );
       }
 
+      const books = bookSnapshot.docs.map((book) => {
+        return { bookDocId: book.id, ...book.data() };
+      });
+
+      const bookNames = books.map((book) => book.bookName);
+
+      const booksAndUsers = getUniqueArray(bookNames).map((name) => {
+        return {
+          bookName: name,
+          userIds: books
+            .filter((val) => val.bookName === name)
+            .map((val) => val.userId),
+        };
+      });
+
       const userIds = bookSnapshot.docs.map((book) => book.data().userId);
       const userSnapshot = await adminDB
         .collection("users")
         .where("id", "in", userIds)
         .where("id", "!=", userId)
         .get();
-      const users = userSnapshot.docs.map((user) => user.data() as User);
 
-      console.log(userIds);
+      if (userSnapshot.empty) {
+        return Response.json(
+          { message: "No users with the books you are looking for", data: [] },
+          { status: 200 }
+        );
+      }
+
+      const users = userSnapshot.docs.map((user) => user.data() as User);
+      const categorizedUsers = booksAndUsers.map((val) => {
+        return {
+          bookName: val.bookName,
+          users: val.userIds
+            .map((id) => {
+              return users.filter((user) => user.id === id);
+            })
+            .flat(),
+        };
+      });
+
+      console.log(categorizedUsers);
 
       return Response.json(
-        { message: "Query successful", data: users },
+        { message: "Query successful", data: categorizedUsers },
         { status: 200 }
       );
     }

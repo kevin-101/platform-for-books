@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { XIcon } from "lucide-react";
 
@@ -13,7 +12,7 @@ export default function FriendsLoading() {
       <div className="flex flex-col w-full gap-6">
         <div className="w-full bg-background sticky top-11 lg:top-0 z-40">
           <div className="w-full lg:w-3/4 xl:w-1/2 py-2 flex gap-2">
-            <Input placeholder="Search friends" />
+            <Skeleton className="h-10 w-full" />
 
             <Button variant="outline" className="invisible">
               <XIcon className="size-5" />
