@@ -41,14 +41,14 @@ export default async function BookSearchResults({
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full items-center">
+    <div className="flex flex-col gap-8 w-full items-center">
       {queryResults && queryResults.length > 0 ? (
         queryResults.map((result) => {
           return (
-            <div className="flex flex-col gap-8 w-full">
+            <div key={result.bookName} className="flex flex-col gap-8 w-full">
               <div className="relative w-full">
                 <div className="w-full border-b border-orange-200" />
-                <h3 className="font-bold absolute px-3 -translate-y-1/2 bg-background left-1/2 -translate-x-1/2">
+                <h3 className="font-bold text-center max-w- absolute px-3 -translate-y-1/2 bg-background left-1/2 -translate-x-1/2">
                   {result.bookName}
                 </h3>
               </div>
