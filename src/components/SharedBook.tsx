@@ -61,21 +61,9 @@ export default function SharedBook({
   }
 
   return (
-    <div className="flex flex-col xl:flex-row gap-4 xl:gap-0 items-center w-full h-full">
-      <div className="flex items-center min-w-[50%] w-full md:w-auto xl:h-full bg-muted">
-        <div className="relative flex">
-          {sharedBook && (
-            <img
-              src={sharedBook.bookImageUrl}
-              alt={`${sharedBook.bookName} image`}
-              className="object-contain"
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col w-full h-full gap-4 bg-orange-50">
-        <div className="flex gap-4 justify-start items-center order-first xl:order-none py-2 xl:px-4 border-b border-orange-200">
+    <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-0 items-center w-full h-full">
+      <div className="flex flex-col items-center justify-center min-w-[50%] w-full md:w-auto xl:h-full xl:bg-muted">
+        <div className="flex 2xl:hidden gap-4 justify-start items-center w-full px-4 py-2">
           <div className="relative size-8">
             <Image
               src={user?.photoURL!}
@@ -88,7 +76,32 @@ export default function SharedBook({
           <h2 className="text-lg font-bold">{user?.displayName}</h2>
         </div>
 
-        <form className="flex-1 flex flex-col justify-center gap-1 xl:px-4 w-full">
+        <div className="relative flex">
+          {sharedBook && (
+            <img
+              src={sharedBook.bookImageUrl}
+              alt={`${sharedBook.bookName} image`}
+              className="object-cover"
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col w-full h-full gap-4 2xl:border-l border-orange-200">
+        <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
+          <div className="relative size-8">
+            <Image
+              src={user?.photoURL!}
+              alt={`${user?.displayName} iamge`}
+              fill
+              className="object-cover rounded-full"
+            />
+          </div>
+
+          <h2 className="text-lg font-bold">{user?.displayName}</h2>
+        </div>
+
+        <form className="flex-1 flex flex-col justify-center gap-1 px-4 w-full overflow-y-auto">
           <label htmlFor={sharedBook?.bookId} className="font-medium">
             Name
           </label>
@@ -100,14 +113,14 @@ export default function SharedBook({
           />
         </form>
 
-        <div className="flex w-full justify-end gap-4 py-2 xl:px-4">
-          {isUserShared &&
-            (isEdit ? (
+        {isUserShared && (
+          <div className="flex w-full justify-end gap-4 py-2 px-4 2xl:border-t xl:border-orange-200">
+            {isEdit ? (
               <>
+                <Button>Save</Button>
                 <Button variant="outline" onClick={() => setIsEdit(false)}>
                   Cancel
                 </Button>
-                <Button>Save</Button>
               </>
             ) : (
               <>
@@ -142,8 +155,9 @@ export default function SharedBook({
 
                 <Button onClick={() => setIsEdit(true)}>Edit</Button>
               </>
-            ))}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

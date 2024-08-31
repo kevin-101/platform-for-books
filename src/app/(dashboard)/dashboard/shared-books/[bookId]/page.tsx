@@ -26,7 +26,7 @@ export default async function SharedBookPage({
   const isUserShared = sharedBook.userId === userId ? true : false;
 
   return (
-    <div className="w-full h-full px-4 pt-4 md:py-8">
+    <div className="w-full h-full">
       <SharedBook sharedBook={sharedBook} isUserShared={isUserShared} />
     </div>
   );
