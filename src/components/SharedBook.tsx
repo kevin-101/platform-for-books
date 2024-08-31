@@ -62,7 +62,7 @@ export default function SharedBook({
 
   return (
     <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-0 items-center w-full h-full">
-      <div className="flex flex-col items-center justify-center min-w-[50%] w-full md:w-auto 2xl:h-full xl:bg-muted">
+      <div className="flex flex-col items-center justify-center w-full 2xl:max-w-[50%] 2xl:h-full 2xl:bg-muted">
         <div className="flex 2xl:hidden gap-4 justify-start items-center w-full px-4 py-2">
           <div className="relative size-8">
             <Image
@@ -77,7 +77,7 @@ export default function SharedBook({
         </div>
 
         {/* shared book image */}
-        <div className="relative flex w-full h-auto min-h-60 2xl:max-h-full">
+        <div className="relative flex justify-center w-full min-h-40 2xl:h-screen">
           {sharedBook && (
             <img
               src={sharedBook.bookImageUrl}
