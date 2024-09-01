@@ -2,6 +2,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import { Suspense } from "react";
 import SharedBooks from "@/components/SharedBooks";
 import { BooksLoading } from "../../profile/page";
+import { cookies } from "next/headers";
 
 type UserProfilePageProps = {
   params: {
@@ -12,6 +13,7 @@ type UserProfilePageProps = {
 export default async function UserProfilePage({
   params: { userId },
 }: UserProfilePageProps) {
+  cookies();
   const userRes = await fetch(
     `${process.env.APP_DOMAIN}/api/users?id=${userId}`
   );

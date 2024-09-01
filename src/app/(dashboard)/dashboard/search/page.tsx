@@ -1,13 +1,13 @@
 import BookSearchResults from "@/components/BookSearchResults";
 import LoadingComp from "@/components/LoadingComp";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
 const SearchField = dynamic(() => import("@/components/SearchField"), {
   loading: () => (
     <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2">
-      <Skeleton className="w-full h-10" />
+      <Input disabled placeholder="Search for books" />
       <div className="invisible h-10 w-16" />
     </div>
   ),

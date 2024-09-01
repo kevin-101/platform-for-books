@@ -24,11 +24,13 @@ import { deleteSharedBook } from "@/lib/firebase-actions/deleteSharedBook";
 import Image from "next/image";
 
 type SharedBookProps = {
+  bookId: string;
   sharedBook: UserSharedBook | undefined;
   isUserShared: boolean;
 };
 
 export default function SharedBook({
+  bookId,
   sharedBook,
   isUserShared,
 }: SharedBookProps) {
@@ -47,7 +49,7 @@ export default function SharedBook({
         const bookImageRef = ref(storage, sharedBook.bookImageUrl);
         await deleteObject(bookImageRef);
 
-        await deleteSharedBook(sharedBook.bookId, user.uid);
+        await deleteSharedBook(bookId, user.uid);
 
         toast.success("Book deleted");
         router.replace("/dashboard/profile");

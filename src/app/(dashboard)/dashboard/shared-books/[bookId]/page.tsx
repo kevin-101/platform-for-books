@@ -27,7 +27,11 @@ export default async function SharedBookPage({
 
   return (
     <div className="w-full h-full">
-      <SharedBook sharedBook={sharedBook} isUserShared={isUserShared} />
+      <SharedBook
+        bookId={bookId}
+        sharedBook={sharedBook}
+        isUserShared={isUserShared}
+      />
     </div>
   );
 }
