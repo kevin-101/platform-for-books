@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
       const bookSnapshot = (await adminDB
         .collection(`shared-books`)
         .where("bookId", "in", queryBookIds)
+        .where("userId", "!=", userId)
         .get()) as QuerySnapshot<
         Omit<UserSharedBook, "bookDocId">,
         DocumentData
