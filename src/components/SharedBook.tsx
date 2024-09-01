@@ -17,25 +17,24 @@ import {
 import { Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAuthContext } from "./AuthProvider";
 import { deleteObject, ref } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { deleteSharedBook } from "@/lib/firebase-actions/deleteSharedBook";
 import Image from "next/image";
 
 type SharedBookProps = {
+  user: User;
   bookId: string;
   sharedBook: UserSharedBook | undefined;
   isUserShared: boolean;
 };
 
 export default function SharedBook({
+  user,
   bookId,
   sharedBook,
   isUserShared,
 }: SharedBookProps) {
-  const [user] = useAuthContext();
-
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
@@ -49,7 +48,7 @@ export default function SharedBook({
         const bookImageRef = ref(storage, sharedBook.bookImageUrl);
         await deleteObject(bookImageRef);
 
-        await deleteSharedBook(bookId, user.uid);
+        await deleteSharedBook(bookId, user.id);
 
         toast.success("Book deleted");
         router.replace("/dashboard/profile");
@@ -67,12 +66,14 @@ export default function SharedBook({
       <div className="flex flex-col items-center justify-center w-full 2xl:max-w-[50%] 2xl:h-full 2xl:bg-muted">
         <div className="flex 2xl:hidden gap-4 justify-start items-center w-full px-4 py-2">
           <div className="relative size-8">
-            <Image
-              src={user?.photoURL!}
-              alt={`${user?.displayName} iamge`}
-              fill
-              className="object-cover rounded-full"
-            />
+            {user && (
+              <Image
+                src={user.photoUrl}
+                alt={`${user.displayName} iamge`}
+                fill
+                className="object-cover rounded-full"
+              />
+            )}
           </div>
 
           <h2 className="text-lg font-bold">{user?.displayName}</h2>
@@ -93,12 +94,14 @@ export default function SharedBook({
       <div className="flex flex-col w-full h-full gap-4 2xl:border-l border-orange-200">
         <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
           <div className="relative size-8">
-            <Image
-              src={user?.photoURL!}
-              alt={`${user?.displayName} iamge`}
-              fill
-              className="object-cover rounded-full"
-            />
+            {user && (
+              <Image
+                src={user.photoUrl}
+                alt={`${user.displayName} iamge`}
+                fill
+                className="object-cover rounded-full"
+              />
+            )}
           </div>
 
           <h2 className="text-lg font-bold">{user?.displayName}</h2>

@@ -14,6 +14,7 @@ export default async function SharedBookPage({
   const idToken = cookies().get("idToken")?.value;
   const userId = idToken && (await adminAuth?.verifyIdToken(idToken))?.uid;
 
+  // get shared book
   const bookRes = await fetch(
     `${process.env.APP_DOMAIN}/api/shared-books?bookId=${bookId}`
   );
@@ -21,13 +22,25 @@ export default async function SharedBookPage({
   if (!bookRes.ok) {
     throw new Error(bookRes.statusText);
   }
-  const sharedBook = (await bookRes.json()).data as UserSharedBook;
 
+  const sharedBook = (await bookRes.json()).data as UserSharedBook;
   const isUserShared = sharedBook.userId === userId ? true : false;
+
+  // get user from shared book
+  const userRes = await fetch(
+    `${process.env.APP_DOMAIN}/api/users?id=${sharedBook.userId}`
+  );
+
+  if (!userRes.ok) {
+    throw new Error(userRes.statusText);
+  }
+
+  const user = (await userRes.json()).data as User;
 
   return (
     <div className="w-full h-full">
       <SharedBook
+        user={user}
         bookId={bookId}
         sharedBook={sharedBook}
         isUserShared={isUserShared}
