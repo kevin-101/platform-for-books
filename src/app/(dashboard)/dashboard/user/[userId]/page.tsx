@@ -1,8 +1,8 @@
 import ProfileHeader from "@/components/ProfileHeader";
 import { Suspense } from "react";
 import SharedBooks from "@/components/SharedBooks";
-import { BooksLoading } from "../../profile/page";
 import { cookies } from "next/headers";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type UserProfilePageProps = {
   params: {
@@ -40,4 +40,10 @@ export default async function UserProfilePage({
       </div>
     </div>
   );
+}
+
+function BooksLoading() {
+  return [...Array(4)].map((_, i) => {
+    return <Skeleton key={i} className="aspect-square" />;
+  });
 }

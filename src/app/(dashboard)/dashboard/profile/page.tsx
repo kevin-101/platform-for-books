@@ -44,7 +44,7 @@ export default async function ProfilePage() {
   );
 }
 
-export function BooksLoading() {
+function BooksLoading() {
   return [...Array(3)].map((_, i) => {
     return <Skeleton key={i} className="aspect-square" />;
   });

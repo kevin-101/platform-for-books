@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
 import NavLinks from "./NavLinks";
 import NavFooter from "./NavFooter";
-import { Suspense } from "react";
 
 type DashboardSideNavProps = {
   className?: ClassValue;
