@@ -10,11 +10,14 @@ const AuthContext = createContext<IdTokenHook>([undefined, false, undefined]);
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
+  // TODO: fix session
   const [user, loading, error] = useIdToken(auth, {
     onUserChanged: async (user) => {
       if (user) {
         let idToken = await user.getIdToken(true);
-        document.cookie = `idToken=${idToken};path=/`;
+        document.cookie = `idToken=${idToken};path=/;max-age=${
+          60 * 60 * 24 * 365
+        }`;
       }
       if (!user) {
         document.cookie = `idToken=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/`;
