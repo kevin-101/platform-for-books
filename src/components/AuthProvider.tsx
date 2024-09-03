@@ -10,7 +10,6 @@ const AuthContext = createContext<IdTokenHook>([undefined, false, undefined]);
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  // TODO: fix session
   const [user, loading, error] = useIdToken(auth, {
     onUserChanged: async (user) => {
       if (user) {

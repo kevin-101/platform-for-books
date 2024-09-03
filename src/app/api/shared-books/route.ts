@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      const sharedBook = bookSnapshot.data();
+      const sharedBook = { bookDocId: bookSnapshot.id, ...bookSnapshot.data() };
 
       return Response.json(
         { message: "Query successful", data: sharedBook },

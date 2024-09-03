@@ -24,14 +24,12 @@ import Image from "next/image";
 
 type SharedBookProps = {
   user: User;
-  bookId: string;
   sharedBook: UserSharedBook | undefined;
   isUserShared: boolean;
 };
 
 export default function SharedBook({
   user,
-  bookId,
   sharedBook,
   isUserShared,
 }: SharedBookProps) {
@@ -40,15 +38,20 @@ export default function SharedBook({
 
   const router = useRouter();
 
-  async function handleDelete() {
+  async function handleDelete(
+    user: User,
+    sharedBook: UserSharedBook | undefined
+  ) {
     if (user && sharedBook) {
       try {
         setDeleteLoading(true);
 
         const bookImageRef = ref(storage, sharedBook.bookImageUrl);
-        await deleteObject(bookImageRef);
 
-        await deleteSharedBook(bookId, user.id);
+        await Promise.all([
+          deleteObject(bookImageRef),
+          deleteSharedBook(sharedBook.bookDocId, user.id),
+        ]);
 
         toast.success("Book deleted");
         router.replace("/dashboard/profile");
@@ -152,7 +155,9 @@ export default function SharedBook({
 
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete()}>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(user, sharedBook)}
+                      >
                         Continue
                       </AlertDialogAction>
                     </AlertDialogFooter>
