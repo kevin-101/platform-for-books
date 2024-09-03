@@ -51,8 +51,9 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
   >();
 
   // for image upload
-  const [uploadImage, uploadLoading, imageUploadSnapshot] = useUploadFile();
+  const [uploadImage, _, imageUploadSnapshot] = useUploadFile();
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [addLoading, setAddLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (imageUploadSnapshot) {
@@ -115,6 +116,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
 
     if (imageFiles && imageFiles[0] && selectedBook && user) {
       try {
+        setAddLoading(true);
         const imageRef = ref(
           storage,
           `${user.id}/${selectedBook.bookName}.${
@@ -122,17 +124,19 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
           }`
         );
         await uploadImage(imageRef, imageFiles[0]);
+
         const uploadedImageUrl = await getDownloadURL(imageRef);
-        setUploadProgress(0);
 
         await addBook(selectedBook, user, uploadedImageUrl);
 
-        setDialogState(false);
         toast.success("Book added successfully");
       } catch (error) {
-        setDialogState(false);
         toast.error("Something went wrong");
         console.log(error);
+      } finally {
+        setAddLoading(false);
+        setDialogState(false);
+        setUploadProgress(0);
       }
     }
   }
@@ -269,8 +273,8 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
         </div>
 
         <DialogFooter>
-          <Button disabled={uploadLoading} onClick={() => handleAdd()}>
-            {uploadLoading ? (
+          <Button disabled={addLoading} onClick={() => handleAdd()}>
+            {addLoading ? (
               <Loader2Icon className="size-5 animate-spin" />
             ) : (
               "Add"
