@@ -239,7 +239,6 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
               ref={bookImageRef}
               type="file"
               accept="image/*"
-              capture="environment"
               onChange={(e) => handleImageSelect(e)}
             />
           </div>
