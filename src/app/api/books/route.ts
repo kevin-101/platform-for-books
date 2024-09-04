@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     ?.uid;
 
   try {
+    // TODO: this fetch has different results in production
     const bookRes = await fetch(
       `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${query}`
     );
