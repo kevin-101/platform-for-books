@@ -13,7 +13,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, loading, error] = useIdToken(auth, {
     onUserChanged: async (user) => {
       if (user) {
-        user.reload();
         let idToken = await user.getIdToken(true);
         document.cookie = `idToken=${idToken};path=/;max-age=${
           60 * 60 * 24 * 365
