@@ -59,6 +59,10 @@ export async function GET(req: NextRequest) {
     const books = (await bookRes.json()).items as Book[];
     const queryBookIds = books.map((book) => book.id);
 
+    // for testing
+    const bookNames = books.map((book) => book.volumeInfo.title);
+    console.log(bookNames);
+
     if (queryBookIds && queryBookIds.length > 0) {
       const bookSnapshot = (await adminDB
         .collection(`shared-books`)
@@ -116,8 +120,6 @@ export async function GET(req: NextRequest) {
             .flat(),
         };
       });
-
-      console.log(categorizedUsers);
 
       return Response.json(
         { message: "Query successful", data: categorizedUsers },
