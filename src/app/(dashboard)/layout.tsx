@@ -7,6 +7,9 @@ type DashboardLayoutProps = {
 };
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  // TODO: include AddBookButton in this layout
+  // and hide it in the profile page
+
   return (
     <div className="w-full min-h-[100dvh] flex flex-col lg:flex-row">
       <DashboardSideNav />

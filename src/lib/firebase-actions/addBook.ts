@@ -4,6 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminAuth, adminDB } from "../firebase-admin";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { User } from "firebase/auth";
 
 export async function addBook(
   selectedBook: { bookId: string; bookName: string },
@@ -28,19 +29,19 @@ export async function addBook(
   const sharedBook = await adminDB.collection(`shared-books`).add({
     bookId: selectedBook.bookId,
     bookName: selectedBook.bookName,
-    userId: user.id,
+    userId: user.uid,
     bookImageUrl: uploadedImageUrl,
   });
 
   const userBooks = await adminDB
     .collection(`user-shared-books`)
-    .doc(user.id)
+    .doc(user.uid)
     .get();
 
   if (!userBooks.exists) {
     await adminDB
       .collection(`user-shared-books`)
-      .doc(user.id)
+      .doc(user.uid)
       .set({ bookIds: FieldValue.arrayUnion(sharedBook.id) });
 
     revalidatePath("/dashboard/profile");
@@ -50,7 +51,7 @@ export async function addBook(
 
   await adminDB
     .collection(`user-shared-books`)
-    .doc(user.id)
+    .doc(user.uid)
     .update({
       bookIds: FieldValue.arrayUnion(sharedBook.id),
     });

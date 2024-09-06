@@ -33,7 +33,7 @@ export default async function ProfilePage() {
         </h2>
 
         <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">
-          <AddBookButton user={user} className="aspect-square rounded-md" />
+          <AddBookButton className="aspect-square rounded-md" />
 
           <Suspense fallback={<BooksLoading />}>
             <SharedBooks user={user} />

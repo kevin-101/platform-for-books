@@ -24,13 +24,15 @@ import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import LoadingComp from "./LoadingComp";
 import { addBook } from "@/lib/firebase-actions/addBook";
+import { useAuthContext } from "./AuthProvider";
 
 type AddBookButtonProps = {
   className?: ClassValue;
-  user: User | undefined;
 };
 
-export default function AddBookButton({ className, user }: AddBookButtonProps) {
+export default function AddBookButton({ className }: AddBookButtonProps) {
+  const [user] = useAuthContext();
+
   // for dialog
   const [dialogState, setDialogState] = useState<boolean>(false);
 
@@ -119,7 +121,7 @@ export default function AddBookButton({ className, user }: AddBookButtonProps) {
         setAddLoading(true);
         const imageRef = ref(
           storage,
-          `${user.id}/${selectedBook.bookName}.${
+          `${user.uid}/${selectedBook.bookName}.${
             imageFiles[0].type.split("/")[1]
           }`
         );
