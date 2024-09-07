@@ -23,7 +23,7 @@ import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import LoadingComp from "./LoadingComp";
-import { addBook } from "@/lib/firebase-actions/addBook";
+import { addBook } from "@/actions/firebase-actions/addBook";
 import { useAuthContext } from "./AuthProvider";
 
 type AddBookButtonProps = {

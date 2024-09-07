@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteObject, ref } from "firebase/storage";
 import { storage } from "@/lib/firebase";
-import { deleteSharedBook } from "@/lib/firebase-actions/deleteSharedBook";
+import { deleteSharedBook } from "@/actions/firebase-actions/deleteSharedBook";
 import Image from "next/image";
 
 type SharedBookProps = {

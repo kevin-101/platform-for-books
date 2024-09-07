@@ -16,7 +16,7 @@ import { User as AuthUser } from "firebase/auth";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { useAuthContext } from "./AuthProvider";
-import { removeFriend } from "@/lib/firebase-actions/removeFriend";
+import { removeFriend } from "@/actions/firebase-actions/removeFriend";
 
 type FriendsListProps = {
   friends: User[] | undefined;
