@@ -110,6 +110,7 @@ export default function SharedBook({
           <h2 className="text-lg font-bold">{user?.displayName}</h2>
         </div>
 
+        {/* TODO: Might integrate react hook form */}
         <form className="flex-1 flex flex-col justify-center gap-1 px-4 w-full overflow-y-auto">
           <label htmlFor={sharedBook?.bookId} className="font-medium">
             Name

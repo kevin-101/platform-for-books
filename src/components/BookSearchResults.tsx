@@ -5,6 +5,12 @@ import { formatChatId } from "@/lib/utils";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebase-admin";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 type BookSearchResultsProps = {
   searchTerm: string | undefined;
@@ -43,26 +49,29 @@ export default async function BookSearchResults({
   return (
     <div className="flex flex-col gap-8 w-full items-center">
       {queryResults && queryResults.length > 0 ? (
-        queryResults.map((result) => {
-          return (
-            <div key={result.bookName} className="flex flex-col gap-8 w-full">
-              <div className="relative w-full">
-                <div className="w-full border-b border-orange-200" />
-                <h3 className="font-bold text-center max-w- absolute px-3 -translate-y-1/2 bg-background left-1/2 -translate-x-1/2">
-                  {result.bookName}
-                </h3>
-              </div>
-
-              {result.users.map((user) => (
-                <UserListItem
-                  key={user.id}
-                  user={user}
-                  actions={<Actions friendId={user.id} userId={userId} />}
-                />
-              ))}
-            </div>
-          );
-        })
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full"
+          defaultValue={queryResults[0].bookName}
+        >
+          {queryResults.map((result) => {
+            return (
+              <AccordionItem key={result.bookName} value={result.bookName}>
+                <AccordionTrigger>{result.bookName}</AccordionTrigger>
+                <AccordionContent>
+                  {result.users.map((user) => (
+                    <UserListItem
+                      key={user.id}
+                      user={user}
+                      actions={<Actions friendId={user.id} userId={userId} />}
+                    />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
       ) : (
         <p className="text-lg font-medium text-muted-foreground w-full text-center">
           No results
