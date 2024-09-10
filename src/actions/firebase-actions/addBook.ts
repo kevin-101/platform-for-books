@@ -31,6 +31,7 @@ export async function addBook(
     bookName: selectedBook.bookName,
     userId: user.uid,
     bookImageUrl: uploadedImageUrl,
+    timestamp: FieldValue.serverTimestamp(),
   });
 
   const userBooks = await adminDB

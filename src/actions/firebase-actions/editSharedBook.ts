@@ -1,14 +1,14 @@
 "use server";
 
 import { adminAuth, adminDB } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
 export async function editSharedBook(
   bookId: string,
   userId: string,
-  newBookId: string,
-  bookName: string,
+  newBook?: { bookId: string; bookName: string },
   bookImageUrl?: string
 ) {
   if (!adminDB) {
@@ -26,17 +26,33 @@ export async function editSharedBook(
     throw new Error("Unauthorized");
   }
 
-  if (bookImageUrl) {
+  if (!bookImageUrl && !newBook) {
+    throw new Error("New book nor book image url not provided");
+  }
+
+  if (bookImageUrl && newBook) {
     await adminDB.collection("shared-books").doc(bookId).update({
-      bookId: newBookId,
-      bookName: bookName,
+      bookId: newBook.bookId,
+      bookName: newBook.bookName,
       bookImageUrl: bookImageUrl,
+      timestamp: FieldValue.serverTimestamp(),
     });
   }
 
-  await adminDB.collection("shared-books").doc(bookId).update({
-    bookName: bookName,
-  });
+  if (bookImageUrl) {
+    await adminDB.collection("shared-books").doc(bookId).update({
+      bookImageUrl: bookImageUrl,
+      timestamp: FieldValue.serverTimestamp(),
+    });
+  }
+
+  if (newBook) {
+    await adminDB.collection("shared-books").doc(bookId).update({
+      bookId: newBook.bookId,
+      bookName: newBook.bookName,
+      timestamp: FieldValue.serverTimestamp(),
+    });
+  }
 
   revalidatePath(`/dashboard/profile`);
   revalidatePath(`/dashboard/user/${userId}`);

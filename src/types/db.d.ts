@@ -27,6 +27,7 @@ type UserSharedBook = {
   bookName: string;
   bookImageUrl: string;
   userId: string;
+  timestamp: { _seconds: number; _nanoseconds: number };
 };
 
 type SharedBookUsers = {

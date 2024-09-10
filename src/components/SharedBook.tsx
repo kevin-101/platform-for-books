@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import {
@@ -14,19 +14,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import { Loader2Icon } from "lucide-react";
+import { ImagePlusIcon, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteObject, ref } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { deleteSharedBook } from "@/actions/firebase-actions/deleteSharedBook";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editSharedBook } from "@/actions/firebase-actions/editSharedBook";
 import { useUploadFile } from "react-firebase-hooks/storage";
 import { cn } from "@/lib/utils";
+import BookSelect from "./BookSelect";
 
 type SharedBookProps = {
   user: User;
@@ -35,10 +36,7 @@ type SharedBookProps = {
 };
 
 const formSchema = z.object({
-  bookName: z
-    .string()
-    .min(1, "Book name cannot be empty")
-    .max(30, "Book name can only be a maximum of 30 characters"),
+  bookName: z.string(),
 });
 
 export default function SharedBook({
@@ -46,24 +44,35 @@ export default function SharedBook({
   sharedBook,
   isUserShared,
 }: SharedBookProps) {
+  // state of the form
   const [isEdit, setIsEdit] = useState<boolean>(false);
 
-  const [newBookId, setNewBookId] = useState<string>();
+  // state related to the book
+  const [newBook, setNewBook] = useState<{
+    bookId: string;
+    bookName: string;
+  }>();
   const [imageFile, setImageFile] = useState<File>();
-  const [bookImagePath, setBookImagePath] = useState<string>();
+  const [bookImagePath, setBookImagePath] = useState<
+    string | ArrayBuffer | null
+  >();
 
+  // loading states
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [editLoading, setEditLoading] = useState<boolean>(false);
 
+  // to upload new image if provided
   const [uploadNewImage] = useUploadFile();
 
   const router = useRouter();
 
+  // rhf form handler
   const {
-    register,
+    setValue,
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,8 +106,23 @@ export default function SharedBook({
     }
   }
 
+  function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+
+    if (files && files[0]) {
+      setImageFile(files[0]);
+
+      const fileReader = new FileReader();
+
+      fileReader.addEventListener("load", (e) => {
+        setBookImagePath(e.target?.result);
+      });
+      fileReader.readAsDataURL(files[0]);
+    }
+  }
+
   const editBook = handleSubmit(async (data) => {
-    if (sharedBook && newBookId) {
+    if (sharedBook) {
       try {
         setEditLoading(true);
 
@@ -106,14 +130,19 @@ export default function SharedBook({
 
         if (imageFile) {
           deleteObject(ref(storage, sharedBook.bookImageUrl));
-          await uploadNewImage(ref(storage, `${user.id}/`), imageFile);
+
+          const newImageRef = ref(
+            storage,
+            `${user.id}/${data.bookName}.${imageFile.type.split("/")[1]}`
+          );
+          await uploadNewImage(newImageRef, imageFile);
+          newImageUrl = await getDownloadURL(newImageRef);
         }
 
         await editSharedBook(
           sharedBook.bookDocId,
           user.id,
-          newBookId,
-          data.bookName,
+          newBook,
           newImageUrl
         );
 
@@ -123,13 +152,18 @@ export default function SharedBook({
         toast.error("Something went wrong");
       } finally {
         setEditLoading(false);
+        setIsEdit(false);
+        setNewBook(undefined);
+        setValue("bookName", sharedBook.bookName);
       }
     }
   });
 
   return (
     <div className="flex flex-col 2xl:flex-row gap-4 2xl:gap-0 items-center w-full 2xl:h-full">
+      {/* shared book image container */}
       <div className="flex flex-col items-center justify-center w-full 2xl:max-w-[50%] 2xl:h-full 2xl:bg-muted">
+        {/* user details for smaller screens */}
         <div className="flex 2xl:hidden gap-4 justify-start items-center w-full px-4 py-2">
           <div className="relative size-8">
             {user && (
@@ -145,11 +179,40 @@ export default function SharedBook({
           <h2 className="text-lg font-bold">{user?.displayName}</h2>
         </div>
 
-        {/* shared book image */}
         <div className="relative flex justify-center w-full min-h-40 2xl:h-screen">
+          {/* image select input overlay for edit state */}
+          {isEdit && (
+            <>
+              <label
+                htmlFor="bookImage"
+                className="group absolute inset-0 bg-muted/50 hover:bg-muted/70 transition-colors cursor-pointer"
+              >
+                <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                  <ImagePlusIcon className="size-8 md:size-10 text-foreground/70 top-1/2 group-hover:text-foreground" />
+                  <p className="text-lg font-medium text-center text-foreground/70 group-hover:text-foreground">
+                    Select new Image {"("}Optional{")"}
+                  </p>
+                </div>
+              </label>
+
+              <input
+                id="bookImage"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageSelect(e)}
+              />
+            </>
+          )}
+
+          {/* shared book image */}
           {sharedBook && (
             <img
-              src={sharedBook.bookImageUrl}
+              src={
+                isEdit && bookImagePath
+                  ? (bookImagePath as string)
+                  : sharedBook.bookImageUrl
+              }
               alt={`${sharedBook.bookName} image`}
               className="object-contain"
             />
@@ -157,7 +220,9 @@ export default function SharedBook({
         </div>
       </div>
 
+      {/* shared book details container */}
       <div className="flex flex-col w-full h-full 2xl:border-l border-orange-200">
+        {/* user details */}
         <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
           <div className="relative size-8">
             {user && (
@@ -177,23 +242,41 @@ export default function SharedBook({
         <form onSubmit={editBook} className="flex-1 relative">
           <div
             className={cn(
-              "2xl:absolute 2xl:inset-0 flex flex-col gap-4 px-4 py-4 h-full 2xl:overflow-y-auto",
+              "2xl:absolute 2xl:inset-0 flex flex-col justify-center gap-4 px-4 py-4 h-full 2xl:overflow-y-auto",
               {
                 "justify-center": !isEdit,
               }
             )}
           >
             <div className="space-y-1">
-              <div>
+              <div className="flex flex-col">
                 <label htmlFor={sharedBook?.bookId} className="font-medium">
                   Name
                 </label>
-                <Input
-                  type="text"
-                  id={sharedBook?.bookId}
-                  disabled={!isEdit}
-                  {...register("bookName", { required: true })}
+
+                <Controller
+                  name="bookName"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      id={sharedBook?.bookId}
+                      disabled
+                      className={`${isEdit && "hidden"}`}
+                      {...field}
+                    />
+                  )}
                 />
+
+                {isEdit && (
+                  <BookSelect
+                    value={newBook}
+                    setValue={(bookId, bookName) => {
+                      setNewBook({ bookId: bookId, bookName: bookName });
+                      setValue("bookName", bookName);
+                    }}
+                  />
+                )}
               </div>
 
               {isEdit && (
@@ -205,37 +288,10 @@ export default function SharedBook({
 
             {isEdit && (
               <>
-                <div className="space-y-1">
-                  <div>
-                    <label htmlFor="bookImage" className="font-medium">
-                      Book Image {"("}optional{")"}
-                    </label>
-                    <Input
-                      type="file"
-                      id="bookImage"
-                      accept="image/*"
-                      onChange={(e) => {
-                        if (e.target.files) setImageFile(e.target.files[0]);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-center items-center w-full min-h-52 2xl:min-h-60 aspect-video bg-muted rounded-md">
-                  {bookImagePath ? (
-                    <img
-                      src={bookImagePath}
-                      alt="Selected book Image"
-                      className="object-contain"
-                    />
-                  ) : (
-                    <p className="text-lg font-medium text-muted-foreground">
-                      Image preview
-                    </p>
-                  )}
-                </div>
-
-                <Button type="submit" disabled={editLoading}>
+                <Button
+                  type="submit"
+                  disabled={(!imageFile && !newBook) || editLoading}
+                >
                   {editLoading ? (
                     <Loader2Icon className="animate-spin size-5" />
                   ) : (
@@ -248,6 +304,8 @@ export default function SharedBook({
                   onClick={() => {
                     setIsEdit(false);
                     reset();
+                    setBookImagePath(undefined);
+                    setNewBook(undefined);
                   }}
                   className="2xl:hidden"
                 >
@@ -267,6 +325,8 @@ export default function SharedBook({
                   onClick={() => {
                     setIsEdit(false);
                     reset();
+                    setBookImagePath(undefined);
+                    setNewBook(undefined);
                   }}
                   className="hidden 2xl:block"
                 >
@@ -306,7 +366,14 @@ export default function SharedBook({
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <Button onClick={() => setIsEdit(true)}>Edit</Button>
+                <Button
+                  onClick={() => {
+                    setIsEdit(true);
+                    setValue("bookName", "");
+                  }}
+                >
+                  Edit
+                </Button>
               </>
             )}
           </div>

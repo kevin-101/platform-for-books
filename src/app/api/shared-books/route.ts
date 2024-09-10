@@ -53,6 +53,13 @@ export async function GET(req: NextRequest) {
 
       const sharedBookIds = bookSnapshot.data() as { bookIds: string[] };
 
+      if (sharedBookIds.bookIds.length <= 0) {
+        return Response.json(
+          { message: "No books found", data: [] },
+          { status: 200 }
+        );
+      }
+
       const sharedBookSnapshot = (await adminDB
         .collection(`shared-books`)
         .where(FieldPath.documentId(), "in", sharedBookIds.bookIds)

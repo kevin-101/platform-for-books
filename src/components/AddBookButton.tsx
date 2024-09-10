@@ -15,16 +15,14 @@ import { useUploadFile } from "react-firebase-hooks/storage";
 import { toast } from "sonner";
 import { storage } from "@/lib/firebase";
 import { getDownloadURL, ref } from "firebase/storage";
-import { ChevronsUpDownIcon, Loader2Icon, PlusIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Loader2Icon, PlusIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
-import { useDebouncedCallback } from "use-debounce";
-import LoadingComp from "./LoadingComp";
 import { addBook } from "@/actions/firebase-actions/addBook";
 import { useAuthContext } from "./AuthProvider";
+import BookSelect from "./BookSelect";
 
 type AddBookButtonProps = {
   className?: ClassValue;
@@ -36,12 +34,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
   // for dialog
   const [dialogState, setDialogState] = useState<boolean>(false);
 
-  // for the search input inside the dialog
-  const [queryResults, setQueryResults] = useState<Book[] | undefined>();
-  const [resultsLoading, setResultsLoading] = useState<boolean>(false);
-
-  // for the book select button
-  const [bookSelectState, setBookSelectState] = useState<boolean>(false);
+  // selected book using BookSelect
   const [selectedBook, setSelectedBook] = useState<
     { bookId: string; bookName: string } | undefined
   >();
@@ -68,37 +61,6 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
       );
     }
   }, [imageUploadSnapshot]);
-
-  const handleSearch = useDebouncedCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const query = e.target.value;
-      setResultsLoading(true);
-
-      if (query && query.length > 0) {
-        try {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_URL}?key=${process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY}&q=${query}`
-          );
-
-          if (!res.ok) {
-            throw new Error(res.statusText);
-          }
-          const data = await res.json();
-
-          setQueryResults(data.items);
-        } catch (error) {
-          console.log(error);
-          toast.error("Something went wrong");
-        } finally {
-          setResultsLoading(false);
-        }
-      } else {
-        setQueryResults([]);
-        setResultsLoading(false);
-      }
-    },
-    600
-  );
 
   function handleImageSelect(e: ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -134,7 +96,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
         toast.success("Book added successfully");
       } catch (error) {
         toast.error("Something went wrong");
-        console.log(error);
+        console.error(error);
       } finally {
         setAddLoading(false);
         setDialogState(false);
@@ -172,68 +134,12 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-8">
-          <Popover
-            open={bookSelectState}
-            onOpenChange={(open) => {
-              setBookSelectState(open);
-              setQueryResults([]);
-            }}
-          >
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="justify-between">
-                <span className="flex-1 w-32 text-start overflow-hidden text-ellipsis">
-                  {selectedBook ? selectedBook.bookName : "Select book"}
-                </span>
-                <ChevronsUpDownIcon className="size-5" />
-              </Button>
-            </PopoverTrigger>
-
-            {/* documentation for --radix-popover-trigger-width variable
-            https://www.radix-ui.com/primitives/docs/components/popover#constrain-the-content-size */}
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-1">
-              <div className="w-full space-y-3">
-                <Input
-                  type="text"
-                  placeholder="search books"
-                  onChange={(e) => handleSearch(e)}
-                />
-
-                <div className="grid place-items-center w-full min-h-20">
-                  {resultsLoading ? (
-                    <LoadingComp />
-                  ) : queryResults && queryResults.length > 0 ? (
-                    <ul className="flex flex-col gap-2 p-1 h-[250px] overflow-auto w-full bg-background">
-                      {queryResults.map((book) => {
-                        return (
-                          <li
-                            key={book.id}
-                            className="py-2 px-4 hover:bg-orange-100 rounded-md cursor-pointer"
-                            onClick={() => {
-                              setSelectedBook({
-                                bookId: book.id,
-                                bookName: book.volumeInfo.title,
-                              });
-                              setQueryResults([]);
-                              setBookSelectState(false);
-                            }}
-                          >
-                            {book.volumeInfo.title}
-                            {book.volumeInfo.authors &&
-                              book.volumeInfo.authors.length > 0 &&
-                              `, ${book.volumeInfo.authors[0]}`}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <p className="font-medium text-muted-foreground">
-                      No matching books
-                    </p>
-                  )}
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <BookSelect
+            value={selectedBook}
+            setValue={(bookId, bookName) =>
+              setSelectedBook({ bookId: bookId, bookName: bookName })
+            }
+          />
 
           <div className="flex flex-col gap-2 w-full">
             <p className="font-medium">Choose an image of your book</p>
