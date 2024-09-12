@@ -28,6 +28,7 @@ import { editSharedBook } from "@/actions/firebase-actions/editSharedBook";
 import { useUploadFile } from "react-firebase-hooks/storage";
 import { cn } from "@/lib/utils";
 import BookSelect from "./BookSelect";
+import { Timestamp } from "firebase/firestore";
 
 type SharedBookProps = {
   user: User;
@@ -165,7 +166,7 @@ export default function SharedBook({
       <div className="flex flex-col items-center justify-center w-full 2xl:max-w-[50%] 2xl:h-full 2xl:bg-muted">
         {/* user details for smaller screens */}
         <div className="flex 2xl:hidden gap-4 justify-start items-center w-full px-4 py-2">
-          <div className="relative size-8">
+          <div className="shrink-0 relative size-10">
             {user && (
               <Image
                 src={user.photoUrl}
@@ -176,7 +177,19 @@ export default function SharedBook({
             )}
           </div>
 
-          <h2 className="text-lg font-bold">{user?.displayName}</h2>
+          <div className="flex flex-col w-full">
+            <h2 className="text-lg font-bold">{user?.displayName}</h2>
+            {sharedBook && (
+              <p className="text-sm font-medium">
+                {new Timestamp(
+                  sharedBook.timestamp._seconds,
+                  sharedBook.timestamp._nanoseconds
+                )
+                  .toDate()
+                  .toLocaleDateString("en-GB")}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="relative flex justify-center w-full min-h-40 2xl:h-screen">
@@ -224,7 +237,7 @@ export default function SharedBook({
       <div className="flex flex-col w-full h-full 2xl:border-l border-orange-200">
         {/* user details */}
         <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
-          <div className="relative size-8">
+          <div className="shrink-0 relative size-10">
             {user && (
               <Image
                 src={user.photoUrl}
@@ -235,7 +248,19 @@ export default function SharedBook({
             )}
           </div>
 
-          <h2 className="text-lg font-bold">{user?.displayName}</h2>
+          <div className="flex flex-col w-full">
+            <h2 className="text-lg font-bold">{user?.displayName}</h2>
+            {sharedBook && (
+              <p className="text-sm font-medium">
+                {new Timestamp(
+                  sharedBook.timestamp._seconds,
+                  sharedBook.timestamp._nanoseconds
+                )
+                  .toDate()
+                  .toLocaleDateString("en-GB")}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* book details and edit fields */}
