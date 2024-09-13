@@ -32,7 +32,7 @@ export default async function UserProfilePage({
           Shared books
         </h2>
 
-        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-[2px]">
+        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1">
           <Suspense fallback={<BooksLoading />}>
             <SharedBooks user={user} />
           </Suspense>
