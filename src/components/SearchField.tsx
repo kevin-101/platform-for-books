@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 type SearchFieldProps = {} & InputProps;
@@ -17,6 +17,8 @@ export default function SearchField({ ...props }: SearchFieldProps) {
 
   const [localSearch, setLocalSearch] = useState(searchParams.get("q") || "");
   const debouncedSearch = useDebounce(localSearch, 500);
+
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     function handleSearch(searchTerm: string | null) {
@@ -41,16 +43,19 @@ export default function SearchField({ ...props }: SearchFieldProps) {
     <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2">
       <Input
         {...props}
+        ref={searchRef}
         value={localSearch as string}
         onChange={(e) => setLocalSearch(e.target.value)}
       />
 
+      {/* TODO: focus on the input when this button is clicked */}
       <Button
         variant="outline"
         className={cn(!localSearch && "invisible")}
         onClick={() => {
           setLocalSearch("");
           replace(pathname);
+          searchRef.current?.focus();
         }}
       >
         <XIcon className="size-5" />
