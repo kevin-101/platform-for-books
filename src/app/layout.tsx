@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/components/AuthProvider";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={spaceGrotesk.className}>
-        <AuthProvider>
-          {children}
-          <Toaster richColors closeButton theme="light" />
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <AuthProvider>
+            {children}
+            <Toaster richColors closeButton theme="light" />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

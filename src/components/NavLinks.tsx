@@ -126,7 +126,7 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                   key={i}
                   className={cn(
                     buttonVariants({ size: "lg", variant: "ghost" }),
-                    "bg-orange-100"
+                    "bg-orange-100 dark:bg-orange-950"
                   )}
                 />
               ))
@@ -142,10 +142,10 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                               variant: "ghost",
                               size: "lg",
                               className:
-                                "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 truncate",
+                                "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950 truncate",
                             }),
                             {
-                              "bg-orange-100":
+                              "bg-orange-100 dark:bg-orange-950":
                                 pathname === `/dashboard/chat/${chat.id}`,
                             }
                           )}
@@ -169,10 +169,10 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                             variant: "ghost",
                             size: "lg",
                             className:
-                              "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 truncate",
+                              "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950 truncate",
                           }),
                           {
-                            "bg-orange-100":
+                            "bg-orange-100 dark:bg-orange-950":
                               pathname === `/dashboard/chat/${chat.id}`,
                           }
                         )}
@@ -210,13 +210,14 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                           variant: "ghost",
                           size: "lg",
                           className:
-                            "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100",
+                            "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950",
                         }),
                         {
                           "justify-between":
                             link.href === "/dashboard/friend-requests" &&
                             friendRequestsDoc?.ids?.length,
-                          "bg-orange-100": pathname === link.href,
+                          "bg-orange-100 dark:bg-orange-950":
+                            pathname === link.href,
                         }
                       )}
                     >
@@ -243,13 +244,14 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                         variant: "ghost",
                         size: "lg",
                         className:
-                          "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100",
+                          "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950",
                       }),
                       {
                         "justify-between":
                           link.href === "/dashboard/friend-requests" &&
                           friendRequestsDoc?.ids?.length,
-                        "bg-orange-100": pathname === link.href,
+                        "bg-orange-100 dark:bg-orange-950":
+                          pathname === link.href,
                       }
                     )}
                   >

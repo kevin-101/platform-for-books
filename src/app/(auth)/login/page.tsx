@@ -71,9 +71,11 @@ export default function Page() {
 
   return (
     <div className="flex justify-center w-full h-[100dvh]">
-      <div className="hidden lg:flex flex-col gap-8 justify-center items-center w-1/2 relative bg-orange-50 border-r border-orange-500">
-        <h1 className="text-6xl font-bold text-orange-500">Welcome</h1>
-        <p className="text-3xl text-center text-orange-300">
+      <div className="hidden lg:flex flex-col gap-8 justify-center items-center w-1/2 relative bg-orange-50 dark:bg-orange-800 border-r border-orange-500 dark:border-orange-400">
+        <h1 className="text-6xl font-bold text-orange-500 dark:text-orange-300">
+          Welcome
+        </h1>
+        <p className="text-3xl text-center text-orange-300 dark:text-orange-100">
           Login to get full access to the site
         </p>
       </div>
@@ -81,15 +83,17 @@ export default function Page() {
       <div className="bg-orange-50 lg:bg-background flex-1 flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-12 w-3/4">
           <div className="flex flex-col gap-4 items-center lg:hidden">
-            <h1 className="text-3xl font-bold text-orange-500">Welcome</h1>
-            <p className="text-center text-xl text-orange-300">
+            <h1 className="text-3xl font-bold text-orange-500 dark:text-orange-300">
+              Welcome
+            </h1>
+            <p className="text-center text-xl text-orange-300 dark:text-orange-100">
               Login to get full access to the site
             </p>
           </div>
 
           <Button
             variant="outline"
-            className="flex gap-4 w-full lg:w-2/3 border-orange-200 bg-orange-50 lg:bg-background hover:bg-orange-100 font-bold"
+            className="flex gap-4 w-full lg:w-2/3 border-orange-200 dark:border-orange-400 bg-orange-50 dark:bg-orange-800 lg:bg-background hover:bg-orange-100 dark:hover:bg-orange-900 font-bold"
             disabled={user ? redirectLoading : loading}
             onClick={() => signIn()}
           >

@@ -18,7 +18,7 @@ export default function UserListItem({
   return (
     <li
       className={cn(
-        "flex gap-4 md:gap-6 justify-between items-center w-full p-4 rounded-md bg-orange-50 border border-orange-200",
+        "flex gap-4 md:gap-6 justify-between items-center w-full p-4 rounded-md bg-orange-50 border border-orange-200 dark:bg-orange-800 dark:border-orange-400",
         className
       )}
       {...props}

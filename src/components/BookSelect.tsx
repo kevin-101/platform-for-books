@@ -94,7 +94,7 @@ export default function BookSelect({ value, setValue }: BookSelectProps) {
                   return (
                     <li
                       key={book.id}
-                      className="py-2 px-4 hover:bg-orange-100 rounded-md cursor-pointer"
+                      className="py-2 px-4 hover:bg-orange-100 dark:hover:bg-orange-900 rounded-md cursor-pointer"
                       onClick={() => {
                         setValue(book.id, book.volumeInfo.title);
                         setQueryResults([]);

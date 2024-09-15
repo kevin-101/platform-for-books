@@ -117,7 +117,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
       <DialogTrigger asChild>
         <button
           className={cn(
-            "flex justify-center items-center bg-orange-100 hover:bg-orange-200 transition-colors",
+            "flex justify-center items-center bg-orange-100 dark:bg-orange-800 hover:bg-orange-200 dark:hover:bg-orange-900 transition-colors",
             className
           )}
         >
@@ -173,7 +173,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
           >
             <Progress
               value={uploadProgress}
-              className="flex-1 *:bg-orange-500"
+              className="flex-1 *:bg-orange-500 dark:*:bg-orange-800"
             />
             <span className="font-bold">{`${uploadProgress}%`}</span>
           </div>
