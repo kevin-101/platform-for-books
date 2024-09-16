@@ -125,8 +125,7 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                 <Skeleton
                   key={i}
                   className={cn(
-                    buttonVariants({ size: "lg", variant: "ghost" }),
-                    "bg-orange-100 dark:bg-orange-950"
+                    buttonVariants({ size: "lg", variant: "ghost" })
                   )}
                 />
               ))
@@ -142,10 +141,10 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                               variant: "ghost",
                               size: "lg",
                               className:
-                                "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950 truncate",
+                                "flex items-center justify-start gap-4 text-base font-bold hover:bg-primary hover:text-primary-foreground truncate",
                             }),
                             {
-                              "bg-orange-100 dark:bg-orange-950":
+                              "bg-primary text-primary-foreground":
                                 pathname === `/dashboard/chat/${chat.id}`,
                             }
                           )}
@@ -169,10 +168,10 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                             variant: "ghost",
                             size: "lg",
                             className:
-                              "flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950 truncate",
+                              "flex items-center justify-start gap-4 text-base font-bold hover:bg-primary hover:text-primary-foreground truncate",
                           }),
                           {
-                            "bg-orange-100 dark:bg-orange-950":
+                            "bg-primary text-primary-foreground":
                               pathname === `/dashboard/chat/${chat.id}`,
                           }
                         )}
@@ -210,20 +209,20 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                           variant: "ghost",
                           size: "lg",
                           className:
-                            "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950",
+                            "group flex items-center justify-start gap-4 text-base font-bold hover:bg-primary hover:text-primary-foreground",
                         }),
                         {
                           "justify-between":
                             link.href === "/dashboard/friend-requests" &&
                             friendRequestsDoc?.ids?.length,
-                          "bg-orange-100 dark:bg-orange-950":
+                          "bg-primary text-primary-foreground":
                             pathname === link.href,
                         }
                       )}
                     >
                       <div className="flex gap-4 items-center">
-                        <span className="border border-orange-200 group-hover:border-orange-400 p-1 rounded-lg transition-colors">
-                          <link.icon className="h-5 w-5 stroke-orange-500" />
+                        <span className="border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors">
+                          <link.icon className="h-5 w-5 group-hover:stroke-primary-foreground" />
                         </span>
                         {link.name}
                       </div>
@@ -244,20 +243,20 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                         variant: "ghost",
                         size: "lg",
                         className:
-                          "group flex items-center justify-start gap-4 text-base font-bold hover:bg-orange-100 dark:hover:bg-orange-950",
+                          "group flex items-center justify-start gap-4 text-base font-bold hover:bg-primary hover:text-primary-foreground",
                       }),
                       {
                         "justify-between":
                           link.href === "/dashboard/friend-requests" &&
                           friendRequestsDoc?.ids?.length,
-                        "bg-orange-100 dark:bg-orange-950":
+                        "bg-primary text-primary-foreground":
                           pathname === link.href,
                       }
                     )}
                   >
                     <div className="flex gap-4 items-center">
-                      <span className="border border-orange-200 group-hover:border-orange-400 p-1 rounded-lg transition-colors">
-                        <link.icon className="h-5 w-5 stroke-orange-500" />
+                      <span className="border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors">
+                        <link.icon className="h-5 w-5 group-hover:stroke-primary-foreground" />
                       </span>
                       {link.name}
                     </div>

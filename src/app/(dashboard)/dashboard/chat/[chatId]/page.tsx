@@ -153,7 +153,7 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
 
   return (
     <div className="flex flex-col h-[100dvh] w-full">
-      <div className="flex w-full justify-start p-3 border-b border-orange-200 bg-primary-foreground">
+      <div className="flex w-full justify-start p-3 border-b border-border bg-primary-foreground">
         <div className="flex gap-3 items-center">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-6 w-6" />
@@ -215,7 +215,7 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
         </Button>
       </div>
 
-      <div className="flex gap-3 items-center p-4 bottom-0 bg-primary-foreground border-t border-orange-200">
+      <div className="flex gap-3 items-center p-4 bottom-0 bg-primary-foreground border-t border-border">
         <Input
           ref={messageRef}
           type="text"

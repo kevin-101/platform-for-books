@@ -8,6 +8,7 @@ export default function ChangeThemeButton() {
   const { theme, setTheme } = useTheme();
   return (
     <Button
+      variant="outline"
       size="icon"
       onClick={() => {
         theme === "light" ? setTheme("dark") : setTheme("light");

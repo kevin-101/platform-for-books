@@ -24,8 +24,9 @@ function Messages({ messages, userId, friendId }: MessagesProps) {
           >
             <div
               className={cn("rounded-md p-3 min-w-28 max-w-[90%] break-words", {
-                "bg-orange-200 dark:bg-orange-800": message.userId === userId,
-                "bg-muted": message.userId === friendId,
+                "bg-primary text-primary-foreground": message.userId === userId,
+                "bg-secondary text-secondary-foreground":
+                  message.userId === friendId,
               })}
             >
               <p className="w-full whitespace-pre-wrap">{message.message}</p>

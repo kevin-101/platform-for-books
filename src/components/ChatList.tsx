@@ -16,7 +16,7 @@ export default function ChatList({ userId, chats }: ChatListProps) {
         <Link
           key={chat.id}
           href={`/dashboard/chat/${chat.id}`}
-          className="flex items-center justify-between w-full px-4 lg:px-6 py-4 gap-3 hover:bg-orange-100 transition-colors"
+          className="flex items-center justify-between w-full px-4 lg:px-6 py-4 gap-3 hover:bg-primary hover:text-primary-foreground transition-colors"
         >
           <div className="flex gap-4 w-2/3">
             <div className="relative size-14 flex-shrink-0">

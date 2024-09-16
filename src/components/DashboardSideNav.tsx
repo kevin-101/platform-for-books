@@ -13,7 +13,7 @@ export default function DashboardSideNav({ className }: DashboardSideNavProps) {
   return (
     <nav
       className={cn(
-        "sticky top-0 h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col w-96 border-r border-orange-200 dark:border-orange-400 bg-orange-50 dark:bg-orange-800/70",
+        "sticky top-0 h-screen p-4 hidden lg:flex items-start justify-between gap-2 flex-col w-96 border-r border-border bg-accent/60 backdrop-blur",
         className
       )}
     >

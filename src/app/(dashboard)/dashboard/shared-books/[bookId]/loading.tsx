@@ -17,8 +17,8 @@ export default function BookLoading() {
           <Skeleton className="relative flex w-full h-96 rounded-none" />
         </div>
 
-        <div className="flex flex-col w-full h-full gap-4 2xl:border-l border-orange-200">
-          <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
+        <div className="flex flex-col w-full h-full gap-4 2xl:border-l border-border">
+          <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-border">
             <Skeleton className="shrink-0 size-10 rounded-full" />
 
             <div className="flex flex-col gap-1 w-full">

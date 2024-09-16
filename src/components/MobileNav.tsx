@@ -50,7 +50,7 @@ export default function MobileNav({ className }: MobileNavProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 flex lg:hidden w-full justify-end px-2 py-1 border-b border-orange-200 dark:border-orange-400 bg-orange-50 dark:bg-orange-800/70",
+        "sticky top-0 z-50 flex lg:hidden w-full justify-end px-2 py-1 border-b border-border backdrop-blur bg-accent/60",
         className,
         {
           hidden: pathname === `/dashboard/chat/${chatId}`,
@@ -62,7 +62,7 @@ export default function MobileNav({ className }: MobileNavProps) {
 
         <Sheet>
           <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="icon">
               <div className="relative">
                 <MenuIcon className="h-5 w-5" />
                 {/* {friendRequests && friendRequests.length > 0 && (

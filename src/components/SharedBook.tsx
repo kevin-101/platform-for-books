@@ -234,9 +234,9 @@ export default function SharedBook({
       </div>
 
       {/* shared book details container */}
-      <div className="flex flex-col w-full h-full 2xl:border-l border-orange-200">
+      <div className="flex flex-col w-full h-full 2xl:border-l border-border">
         {/* user details */}
-        <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-orange-200">
+        <div className="hidden 2xl:flex gap-4 justify-start items-center py-2 px-4 border-b border-border">
           <div className="shrink-0 relative size-10">
             {user && (
               <Image
@@ -342,7 +342,7 @@ export default function SharedBook({
         </form>
 
         {isUserShared && (
-          <div className="flex w-full justify-end gap-4 py-2 px-4 2xl:border-t xl:border-orange-200">
+          <div className="flex w-full justify-end gap-4 py-2 px-4 2xl:border-t xl:border-border">
             {isEdit ? (
               <>
                 <Button
