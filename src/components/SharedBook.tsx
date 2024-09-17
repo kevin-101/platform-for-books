@@ -122,6 +122,8 @@ export default function SharedBook({
     }
   }
 
+  // TODO: there is a bug in this function which deletes
+  // the image in the firebase bucket
   const editBook = handleSubmit(async (data) => {
     if (sharedBook) {
       try {

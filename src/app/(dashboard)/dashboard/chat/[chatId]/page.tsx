@@ -188,7 +188,7 @@ export default function ChatPage({ params: { chatId } }: ChatPageProps) {
           <div ref={bottomRef} />
 
           {loading ? (
-            <Loader2Icon className="size-8 text-orange-500 animate-spin" />
+            <Loader2Icon className="size-8 animate-spin" />
           ) : (
             <Messages
               messages={localMessages}
