@@ -136,7 +136,9 @@ export default function SharedBook({
 
           const newImageRef = ref(
             storage,
-            `${user.id}/${data.bookName}.${imageFile.type.split("/")[1]}`
+            `${user.id}/${
+              data.bookName ? data.bookName : sharedBook.bookName
+            }.${imageFile.type.split("/")[1]}`
           );
           await uploadNewImage(newImageRef, imageFile);
           newImageUrl = await getDownloadURL(newImageRef);
@@ -157,6 +159,7 @@ export default function SharedBook({
         setEditLoading(false);
         setIsEdit(false);
         setNewBook(undefined);
+        setImageFile(undefined);
         setValue("bookName", sharedBook.bookName);
       }
     }
@@ -333,6 +336,7 @@ export default function SharedBook({
                     reset();
                     setBookImagePath(undefined);
                     setNewBook(undefined);
+                    setImageFile(undefined);
                   }}
                   className="2xl:hidden"
                 >
@@ -354,6 +358,7 @@ export default function SharedBook({
                     reset();
                     setBookImagePath(undefined);
                     setNewBook(undefined);
+                    setImageFile(undefined);
                   }}
                   className="hidden 2xl:block"
                 >
