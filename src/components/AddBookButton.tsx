@@ -172,7 +172,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
             )}
           >
             <Progress value={uploadProgress} className="flex-1 *:bg-primary" />
-            <span className="font-bold">{`${uploadProgress}%`}</span>
+            <span className="font-bold text-center w-12">{`${uploadProgress}%`}</span>
           </div>
         </div>
 
