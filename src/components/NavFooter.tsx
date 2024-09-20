@@ -34,14 +34,16 @@ export default function NavFooter({ inSheet }: { inSheet?: boolean }) {
         </>
       ) : (
         <>
-          <div className="shrink-0 relative size-12">
+          <div className="shrink-0 relative size-[3.5rem] rounded-full border-2 border-primary">
             {user?.photoURL && (
-              <Image
-                src={user?.photoURL as string}
-                alt={user?.displayName as string}
-                fill
-                className="rounded-full object-cover"
-              />
+              <div className="absolute size-12 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <Image
+                  src={user?.photoURL as string}
+                  alt={user?.displayName as string}
+                  fill
+                  className="rounded-full object-cover"
+                />
+              </div>
             )}
           </div>
 
