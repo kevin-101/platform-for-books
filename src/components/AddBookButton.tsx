@@ -83,7 +83,7 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
         setAddLoading(true);
         const imageRef = ref(
           storage,
-          `${user.uid}/${selectedBook.bookName}.${
+          `${user.uid}/${selectedBook.bookName} ${new Date().toUTCString()}.${
             imageFiles[0].type.split("/")[1]
           }`
         );
