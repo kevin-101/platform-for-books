@@ -1,15 +1,9 @@
 "use client";
 
 import { Button } from "./ui/button";
-import { EllipsisVerticalIcon, MessageCircleIcon, XIcon } from "lucide-react";
+import { Loader2Icon, MessageCircleIcon, UserMinus, XIcon } from "lucide-react";
 import UserListItem from "./UserListItem";
 import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import Link from "next/link";
 import { cn, formatChatId } from "@/lib/utils";
 import { User as AuthUser } from "firebase/auth";
@@ -17,6 +11,17 @@ import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { useAuthContext } from "./AuthProvider";
 import { removeFriend } from "@/actions/firebase-actions/removeFriend";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 type FriendsListProps = {
   friends: User[] | undefined;
@@ -25,6 +30,7 @@ type FriendsListProps = {
 type FriendsListActionsProps = {
   friend: User;
   user: AuthUser | null | undefined;
+  removeLoading: boolean;
   removeFn: () => void;
 };
 
@@ -33,15 +39,21 @@ export default function FriendsList({ friends }: FriendsListProps) {
 
   const [searchText, setSearchText] = useState<string>("");
 
+  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+
   async function handleRemoveFriend(friendId: string) {
     if (user) {
       try {
+        setRemoveLoading(true);
+
         await removeFriend(user.uid, friendId);
 
         toast.success("Friend removed");
       } catch (error) {
         console.log(error);
         toast.error("Something went wrong. Try again");
+      } finally {
+        setRemoveLoading(false);
       }
     }
   }
@@ -84,6 +96,7 @@ export default function FriendsList({ friends }: FriendsListProps) {
                     <FriendsListActions
                       friend={friend}
                       user={user}
+                      removeLoading={removeLoading}
                       removeFn={() => handleRemoveFriend(friend.id)}
                     />
                   }
@@ -98,9 +111,12 @@ export default function FriendsList({ friends }: FriendsListProps) {
   );
 }
 
+// TODO: fix loading for each component rendered
+// currently loading states are shared by all instances of this component
 function FriendsListActions({
   friend,
   user,
+  removeLoading,
   removeFn,
 }: FriendsListActionsProps) {
   return (
@@ -111,22 +127,34 @@ function FriendsListActions({
         </Link>
       </Button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
-            <EllipsisVerticalIcon className="h-5 w-5" />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="icon" disabled={removeLoading}>
+            {removeLoading ? (
+              <Loader2Icon className="animate-spin size-5" />
+            ) : (
+              <UserMinus className="size-5" />
+            )}
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="font-medium">
-          <DropdownMenuItem asChild>
-            <Link href={`/dashboard/user/${friend.id}`}>Profile</Link>
-          </DropdownMenuItem>
+        </AlertDialogTrigger>
 
-          <DropdownMenuItem onClick={() => removeFn()}>
-            Remove friend
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm remove</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              user form your friends list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => removeFn()}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

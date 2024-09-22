@@ -60,13 +60,15 @@ export default async function BookSearchResults({
               <AccordionItem key={result.bookName} value={result.bookName}>
                 <AccordionTrigger>{result.bookName}</AccordionTrigger>
                 <AccordionContent>
-                  {result.users.map((user) => (
-                    <UserListItem
-                      key={user.id}
-                      user={user}
-                      actions={<Actions friendId={user.id} userId={userId} />}
-                    />
-                  ))}
+                  <ul>
+                    {result.users.map((user) => (
+                      <UserListItem
+                        key={user.id}
+                        user={user}
+                        actions={<Actions friendId={user.id} userId={userId} />}
+                      />
+                    ))}
+                  </ul>
                 </AccordionContent>
               </AccordionItem>
             );
@@ -88,18 +90,10 @@ type ActionsProps = {
 
 function Actions({ friendId, userId }: ActionsProps) {
   return (
-    <div className="flex gap-2 md:gap-4">
-      <Button size="icon" asChild>
-        <Link href={`/dashboard/chat/${formatChatId([userId, friendId])}`}>
-          <MessageCircleIcon className="size-5" />
-        </Link>
-      </Button>
-
-      <Button variant="outline" size="icon" asChild>
-        <Link href={`/dashboard/user/${friendId}`}>
-          <UserIcon className="size-5" />
-        </Link>
-      </Button>
-    </div>
+    <Button size="icon" asChild>
+      <Link href={`/dashboard/chat/${formatChatId([userId, friendId])}`}>
+        <MessageCircleIcon className="size-5" />
+      </Link>
+    </Button>
   );
 }

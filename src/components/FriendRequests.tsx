@@ -113,6 +113,8 @@ export default function FriendRequests({
   );
 }
 
+// TODO: fix loading for each component rendered
+// currently loading states are shared by all instances of this component
 function ReqActions({
   denyRequest,
   acceptRequest,
