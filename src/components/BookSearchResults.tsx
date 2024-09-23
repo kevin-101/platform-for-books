@@ -1,4 +1,4 @@
-import { MessageCircleIcon, UserIcon } from "lucide-react";
+import { MessageCircleIcon } from "lucide-react";
 import UserListItem from "./UserListItem";
 import { Button } from "./ui/button";
 import { formatChatId } from "@/lib/utils";
@@ -60,7 +60,7 @@ export default async function BookSearchResults({
               <AccordionItem key={result.bookName} value={result.bookName}>
                 <AccordionTrigger>{result.bookName}</AccordionTrigger>
                 <AccordionContent>
-                  <ul>
+                  <ul className="flex flex-col w-full gap-4">
                     {result.users.map((user) => (
                       <UserListItem
                         key={user.id}
