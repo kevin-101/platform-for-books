@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     } else {
       return Response.json(
         { message: "No friends found", data: [] },
-        { status: 204 }
+        { status: 200 }
       );
     }
   } catch (error) {

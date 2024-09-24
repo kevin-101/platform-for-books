@@ -27,36 +27,10 @@ type FriendsListProps = {
   friends: User[] | undefined;
 };
 
-type FriendsListActionsProps = {
-  friend: User;
-  user: AuthUser | null | undefined;
-  removeLoading: boolean;
-  removeFn: () => void;
-};
-
 export default function FriendsList({ friends }: FriendsListProps) {
   const [user] = useAuthContext();
 
   const [searchText, setSearchText] = useState<string>("");
-
-  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
-
-  async function handleRemoveFriend(friendId: string) {
-    if (user) {
-      try {
-        setRemoveLoading(true);
-
-        await removeFriend(user.uid, friendId);
-
-        toast.success("Friend removed");
-      } catch (error) {
-        console.log(error);
-        toast.error("Something went wrong. Try again");
-      } finally {
-        setRemoveLoading(false);
-      }
-    }
-  }
 
   return (
     <div className="flex flex-col w-full gap-6">
@@ -92,33 +66,43 @@ export default function FriendsList({ friends }: FriendsListProps) {
                 <UserListItem
                   key={friend.id}
                   user={friend}
-                  actions={
-                    <FriendsListActions
-                      friend={friend}
-                      user={user}
-                      removeLoading={removeLoading}
-                      removeFn={() => handleRemoveFriend(friend.id)}
-                    />
-                  }
+                  actions={<FriendsListActions friend={friend} user={user} />}
                 />
               );
             })}
         </ul>
       ) : (
-        <h1 className="text-xl font-bold">No friends</h1>
+        <h1 className="text-xl text-center font-bold">No friends</h1>
       )}
     </div>
   );
 }
 
-// TODO: fix loading for each component rendered
-// currently loading states are shared by all instances of this component
-function FriendsListActions({
-  friend,
-  user,
-  removeLoading,
-  removeFn,
-}: FriendsListActionsProps) {
+type FriendsListActionsProps = {
+  friend: User;
+  user: AuthUser | null | undefined;
+};
+
+function FriendsListActions({ friend, user }: FriendsListActionsProps) {
+  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
+
+  async function handleRemoveFriend() {
+    if (user) {
+      try {
+        setRemoveLoading(true);
+
+        await removeFriend(user.uid, friend.id);
+
+        toast.success("Friend removed");
+      } catch (error) {
+        console.log(error);
+        toast.error("Something went wrong. Try again");
+      } finally {
+        setRemoveLoading(false);
+      }
+    }
+  }
+
   return (
     <div className="flex gap-2 md:gap-4 items-center">
       <Button asChild size="icon">
@@ -149,7 +133,7 @@ function FriendsListActions({
 
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => removeFn()}>
+            <AlertDialogAction onClick={() => handleRemoveFriend()}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

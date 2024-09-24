@@ -22,7 +22,6 @@ export default function UserSearchResults({
   const [user] = useAuthContext();
   const [matchingUsers, setMatchingUsers] = useState<User[]>([]);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
-  const [reqSendLoading, setReqsendLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function searchUser(qry: string | undefined) {
@@ -48,33 +47,20 @@ export default function UserSearchResults({
   }, [email]);
 
   async function sendFriendRequest(requestedUser: User) {
-    try {
-      setReqsendLoading(true);
-      const requestingUserId = user?.uid as string;
+    const requestingUserId = user?.uid as string;
 
-      const incomingFr = await getDoc(
-        doc(db, `incoming-friend-requests/${requestedUser.id}`)
-      );
+    const incomingFr = await getDoc(
+      doc(db, `incoming-friend-requests/${requestedUser.id}`)
+    );
 
-      if (!incomingFr.exists()) {
-        await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
-          ids: arrayUnion(requestingUserId),
-        });
-      } else {
-        await updateDoc(
-          doc(db, `incoming-friend-requests/${requestedUser.id}`),
-          {
-            ids: arrayUnion(requestingUserId),
-          }
-        );
-      }
-
-      toast.success("Friend Request Sent");
-    } catch (error) {
-      console.error(error);
-      toast.error("Something Went Wrong");
-    } finally {
-      setReqsendLoading(false);
+    if (!incomingFr.exists()) {
+      await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
+        ids: arrayUnion(requestingUserId),
+      });
+    } else {
+      await updateDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
+        ids: arrayUnion(requestingUserId),
+      });
     }
   }
 
@@ -92,7 +78,6 @@ export default function UserSearchResults({
                 actions={
                   <AddActions
                     sendFriendRequest={() => sendFriendRequest(user)}
-                    reqSendLoading={reqSendLoading}
                     isFriend={friendIds?.includes(user.id) as boolean}
                   />
                 }
@@ -110,24 +95,34 @@ export default function UserSearchResults({
 }
 
 type AddActionsProps = {
-  sendFriendRequest: () => void;
-  reqSendLoading: boolean;
+  sendFriendRequest: () => Promise<void>;
   isFriend: boolean;
 };
 
-// TODO: fix loading for each component rendered
-// currently loading states are shared by all instances of this component
-function AddActions({
-  sendFriendRequest,
-  reqSendLoading,
-  isFriend,
-}: AddActionsProps) {
+function AddActions({ sendFriendRequest, isFriend }: AddActionsProps) {
+  const [reqSendLoading, setReqsendLoading] = useState<boolean>(false);
+
+  async function send() {
+    try {
+      setReqsendLoading(true);
+
+      await sendFriendRequest();
+
+      toast.success("Friend Request Sent");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something Went Wrong");
+    } finally {
+      setReqsendLoading(false);
+    }
+  }
+
   return isFriend ? (
     <div className="flex justify-center items-center size-10 bg-green-200 border border-green-600 rounded-md">
       <CheckCircleIcon className="size-5 text-green-700" />
     </div>
   ) : (
-    <Button variant="outline" size="icon" onClick={() => sendFriendRequest()}>
+    <Button variant="outline" size="icon" onClick={() => send()}>
       {reqSendLoading ? (
         <Loader2Icon className="h-5 w-5 animate-spin" />
       ) : (

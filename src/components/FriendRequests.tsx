@@ -21,74 +21,44 @@ type FriendRequestsProps = {
   user: AuthUser | null | undefined;
 };
 
-type ReqActionsProps = {
-  denyRequest: () => void;
-  acceptRequest: () => void;
-  denyLoading: boolean;
-  acceptLoading: boolean;
-};
-
 export default function FriendRequests({
   requests,
   user,
 }: FriendRequestsProps) {
-  const [denyLoading, setDenyLoading] = useState<boolean>(false);
-  const [acceptLoading, setAcceptLoading] = useState<boolean>(false);
-
   async function denyRequest(idToDelete: string) {
-    try {
-      setDenyLoading(true);
-      await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
-        ids: arrayRemove(idToDelete),
-      });
-      toast.success("Friend request denied");
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong. Try again");
-    } finally {
-      setDenyLoading(false);
-    }
+    await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
+      ids: arrayRemove(idToDelete),
+    });
   }
 
   async function acceptRequest(friendId: string) {
-    try {
-      setAcceptLoading(true);
+    const userFriends = await getDoc(doc(db, `friends/${user?.uid}`));
+    const otherUserFriends = await getDoc(doc(db, `friends/${friendId}`));
 
-      const userFriends = await getDoc(doc(db, `friends/${user?.uid}`));
-      const otherUserFriends = await getDoc(doc(db, `friends/${friendId}`));
-
-      // add friends mutually and delete incoming request
-      if (!userFriends.exists()) {
-        await setDoc(doc(db, `friends/${user?.uid}`), {
-          ids: arrayUnion(friendId),
-        });
-      } else {
-        await updateDoc(doc(db, `friends/${user?.uid}`), {
-          ids: arrayUnion(friendId),
-        });
-      }
-
-      if (!otherUserFriends.exists()) {
-        await setDoc(doc(db, `friends/${friendId}`), {
-          ids: arrayUnion(user?.uid),
-        });
-      } else {
-        await updateDoc(doc(db, `friends/${friendId}`), {
-          ids: arrayUnion(user?.uid),
-        });
-      }
-
-      await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
-        ids: arrayRemove(friendId),
+    // add friends mutually and delete incoming request
+    if (!userFriends.exists()) {
+      await setDoc(doc(db, `friends/${user?.uid}`), {
+        ids: arrayUnion(friendId),
       });
-
-      toast.success("Friend added");
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong. Try again");
-    } finally {
-      setAcceptLoading(false);
+    } else {
+      await updateDoc(doc(db, `friends/${user?.uid}`), {
+        ids: arrayUnion(friendId),
+      });
     }
+
+    if (!otherUserFriends.exists()) {
+      await setDoc(doc(db, `friends/${friendId}`), {
+        ids: arrayUnion(user?.uid),
+      });
+    } else {
+      await updateDoc(doc(db, `friends/${friendId}`), {
+        ids: arrayUnion(user?.uid),
+      });
+    }
+
+    await updateDoc(doc(db, `incoming-friend-requests/${user?.uid}`), {
+      ids: arrayRemove(friendId),
+    });
   }
 
   return (
@@ -102,8 +72,6 @@ export default function FriendRequests({
               <ReqActions
                 denyRequest={() => denyRequest(request.id)}
                 acceptRequest={() => acceptRequest(request.id)}
-                denyLoading={denyLoading}
-                acceptLoading={acceptLoading}
               />
             }
           />
@@ -113,17 +81,48 @@ export default function FriendRequests({
   );
 }
 
-// TODO: fix loading for each component rendered
-// currently loading states are shared by all instances of this component
-function ReqActions({
-  denyRequest,
-  acceptRequest,
-  denyLoading,
-  acceptLoading,
-}: ReqActionsProps) {
+type ReqActionsProps = {
+  denyRequest: () => Promise<void>;
+  acceptRequest: () => Promise<void>;
+};
+
+function ReqActions({ denyRequest, acceptRequest }: ReqActionsProps) {
+  const [denyLoading, setDenyLoading] = useState<boolean>(false);
+  const [acceptLoading, setAcceptLoading] = useState<boolean>(false);
+
+  async function deny() {
+    try {
+      setDenyLoading(true);
+
+      await denyRequest();
+
+      toast.success("Friend request denied");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong. Try again");
+    } finally {
+      setDenyLoading(false);
+    }
+  }
+
+  async function accept() {
+    try {
+      setAcceptLoading(true);
+
+      await acceptRequest();
+
+      toast.success("Friend added");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Try again");
+    } finally {
+      setAcceptLoading(false);
+    }
+  }
+
   return (
     <div className="flex gap-2">
-      <Button variant="outline" size="icon" onClick={() => denyRequest()}>
+      <Button variant="outline" size="icon" onClick={() => deny()}>
         {denyLoading ? (
           <Loader2Icon className="h-5 w-5 animate-spin" />
         ) : (
@@ -131,7 +130,7 @@ function ReqActions({
         )}
       </Button>
 
-      <Button variant="outline" size="icon" onClick={() => acceptRequest()}>
+      <Button variant="outline" size="icon" onClick={() => accept()}>
         {acceptLoading ? (
           <Loader2Icon className="h-5 w-5 animate-spin" />
         ) : (
