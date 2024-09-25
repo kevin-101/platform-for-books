@@ -24,7 +24,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             {children}
-            <Toaster richColors closeButton theme="light" />
+            <Toaster richColors closeButton />
           </AuthProvider>
         </ThemeProvider>
       </body>
