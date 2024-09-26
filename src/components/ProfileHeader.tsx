@@ -12,7 +12,7 @@ import { Loader2Icon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
 
 type ProfileHeaderProps = {
   user: User | undefined;
-  isFriend: boolean;
+  isFriend?: boolean;
 };
 
 export default function ProfileHeader({ user, isFriend }: ProfileHeaderProps) {
