@@ -4,11 +4,10 @@ import { CheckCircleIcon, Loader2Icon, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuthContext } from "./AuthProvider";
 import { useEffect, useState } from "react";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { toast } from "sonner";
 import UserListItem from "./UserListItem";
 import LoadingComp from "./LoadingComp";
+import { sendFriendRequest } from "@/actions/firebase-actions/sendFriendRequest";
 
 type UserSearchResultsProps = {
   email: string | undefined;
@@ -46,21 +45,12 @@ export default function UserSearchResults({
     searchUser(email);
   }, [email]);
 
-  async function sendFriendRequest(requestedUser: User) {
+  async function handleSendFriendRequest(requestedUser: User) {
     const requestingUserId = user?.uid as string;
 
-    const incomingFr = await getDoc(
-      doc(db, `incoming-friend-requests/${requestedUser.id}`)
-    );
-
-    if (!incomingFr.exists()) {
-      await setDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
-        ids: arrayUnion(requestingUserId),
-      });
-    } else {
-      await updateDoc(doc(db, `incoming-friend-requests/${requestedUser.id}`), {
-        ids: arrayUnion(requestingUserId),
-      });
+    if (requestingUserId && requestedUser) {
+      // server action
+      sendFriendRequest(requestingUserId, requestedUser.id);
     }
   }
 
@@ -77,7 +67,7 @@ export default function UserSearchResults({
                 user={user}
                 actions={
                   <AddActions
-                    sendFriendRequest={() => sendFriendRequest(user)}
+                    sendFriendRequest={() => handleSendFriendRequest(user)}
                     isFriend={friendIds?.includes(user.id) as boolean}
                   />
                 }
