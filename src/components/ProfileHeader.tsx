@@ -11,11 +11,16 @@ import { toast } from "sonner";
 import { Loader2Icon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
 
 type ProfileHeaderProps = {
+  isProfile?: boolean;
   user: User | undefined;
   isFriend?: boolean;
 };
 
-export default function ProfileHeader({ user, isFriend }: ProfileHeaderProps) {
+export default function ProfileHeader({
+  isProfile,
+  user,
+  isFriend,
+}: ProfileHeaderProps) {
   const [currentUser] = useAuthContext();
 
   const [addLoading, setAddLoading] = useState<boolean>(false);
@@ -25,7 +30,7 @@ export default function ProfileHeader({ user, isFriend }: ProfileHeaderProps) {
       try {
         setAddLoading(true);
 
-        sendFriendRequest(currentUser.uid, user.id);
+        await sendFriendRequest(currentUser.uid, user.id);
 
         toast.success("Friend requset sent");
       } catch (error) {
@@ -61,56 +66,60 @@ export default function ProfileHeader({ user, isFriend }: ProfileHeaderProps) {
           </p>
         </div>
 
-        <div className="hidden md:flex flex-col gap-2">
+        {!isProfile && (
+          <div className="hidden md:flex flex-col gap-2">
+            {!isFriend && (
+              <Button
+                size="icon"
+                onClick={() => addFriend()}
+                disabled={addLoading}
+              >
+                {addLoading ? (
+                  <Loader2Icon className="animate-spin size-5" />
+                ) : (
+                  <UserPlusIcon className="size-5" />
+                )}
+              </Button>
+            )}
+
+            <Button size="icon" variant="secondary" asChild>
+              <Link
+                href={`/dashboard/chat/${formatChatId([
+                  currentUser?.uid,
+                  user?.id,
+                ])}`}
+              >
+                <MessageCircleIcon className="size-5" />
+              </Link>
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {!isProfile && (
+        <div className="flex md:hidden gap-2 w-full justify-center px-4 *:w-1/2">
           {!isFriend && (
-            <Button
-              size="icon"
-              onClick={() => addFriend()}
-              disabled={addLoading}
-            >
+            <Button onClick={() => addFriend()} disabled={addLoading}>
               {addLoading ? (
                 <Loader2Icon className="animate-spin size-5" />
               ) : (
-                <UserPlusIcon className="size-5" />
+                "Add friend"
               )}
             </Button>
           )}
 
-          <Button size="icon" variant="secondary" asChild>
+          <Button variant="secondary" asChild>
             <Link
               href={`/dashboard/chat/${formatChatId([
                 currentUser?.uid,
                 user?.id,
               ])}`}
             >
-              <MessageCircleIcon className="size-5" />
+              Chat
             </Link>
           </Button>
         </div>
-      </div>
-
-      <div className="flex md:hidden gap-2 w-full justify-center px-4 *:w-1/2">
-        {!isFriend && (
-          <Button onClick={() => addFriend()} disabled={addLoading}>
-            {addLoading ? (
-              <Loader2Icon className="animate-spin size-5" />
-            ) : (
-              "Add friend"
-            )}
-          </Button>
-        )}
-
-        <Button variant="secondary" asChild>
-          <Link
-            href={`/dashboard/chat/${formatChatId([
-              currentUser?.uid,
-              user?.id,
-            ])}`}
-          >
-            Chat
-          </Link>
-        </Button>
-      </div>
+      )}
     </div>
   );
 }

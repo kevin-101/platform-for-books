@@ -25,7 +25,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-10 items-center py-4 md:py-8">
-      <ProfileHeader user={user} />
+      <ProfileHeader isProfile user={user} />
 
       <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg md:text-xl font-medium text-center md:text-start w-full px-4">

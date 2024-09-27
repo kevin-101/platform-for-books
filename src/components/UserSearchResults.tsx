@@ -50,7 +50,7 @@ export default function UserSearchResults({
 
     if (requestingUserId && requestedUser) {
       // server action
-      sendFriendRequest(requestingUserId, requestedUser.id);
+      await sendFriendRequest(requestingUserId, requestedUser.id);
     }
   }
 
