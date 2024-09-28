@@ -41,7 +41,7 @@ export default async function AddFriendPage({
   });
 
   if (!friendsRes.ok) {
-    throw new Error("Something went wrong");
+    throw new Error(friendsRes.statusText);
   }
 
   const friends = (await friendsRes.json()).data as User[];
