@@ -10,6 +10,8 @@ const AuthContext = createContext<IdTokenHook>([undefined, false, undefined]);
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
+  // TODO: Somehow fix this shit
+  // doesnt refresh on token expire, when opened after token expire
   const [user, loading, error] = useIdToken(auth, {
     onUserChanged: async (user) => {
       if (user) {
