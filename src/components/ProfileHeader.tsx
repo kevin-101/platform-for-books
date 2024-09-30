@@ -8,7 +8,7 @@ import { formatChatId } from "@/lib/utils";
 import { useState } from "react";
 import { sendFriendRequest } from "@/actions/firebase-actions/sendFriendRequest";
 import { toast } from "sonner";
-import { Loader2Icon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, UserPlusIcon } from "lucide-react";
 
 type ProfileHeaderProps = {
   isProfile?: boolean;
@@ -67,8 +67,16 @@ export default function ProfileHeader({
         </div>
 
         {!isProfile && (
-          <div className="hidden md:flex flex-col gap-2">
-            {!isFriend && (
+          <div className="hidden md:flex flex-col items-center gap-2 w-1/4">
+            {isFriend ? (
+              <Button
+                size="icon"
+                className="w-full bg-green-500 dark:bg-green-700 dark:text-foreground"
+                disabled
+              >
+                Friend &nbsp; <CheckIcon className="size-5" />
+              </Button>
+            ) : (
               <Button
                 size="icon"
                 onClick={() => addFriend()}
@@ -82,14 +90,14 @@ export default function ProfileHeader({
               </Button>
             )}
 
-            <Button size="icon" variant="secondary" asChild>
+            <Button size="icon" variant="secondary" className="w-full" asChild>
               <Link
                 href={`/dashboard/chat/${formatChatId([
                   currentUser?.uid,
                   user?.id,
                 ])}`}
               >
-                <MessageCircleIcon className="size-5" />
+                Chat
               </Link>
             </Button>
           </div>
