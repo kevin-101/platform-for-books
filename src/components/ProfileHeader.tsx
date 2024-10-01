@@ -106,7 +106,14 @@ export default function ProfileHeader({
 
       {!isProfile && (
         <div className="flex md:hidden gap-2 w-full justify-center px-4 *:w-1/2">
-          {!isFriend && (
+          {isFriend ? (
+            <Button
+              className="bg-green-500 dark:bg-green-700 dark:text-foreground"
+              disabled
+            >
+              Friend &nbsp; <CheckIcon className="size-5" />
+            </Button>
+          ) : (
             <Button onClick={() => addFriend()} disabled={addLoading}>
               {addLoading ? (
                 <Loader2Icon className="animate-spin size-5" />
