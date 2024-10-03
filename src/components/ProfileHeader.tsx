@@ -8,7 +8,7 @@ import { formatChatId } from "@/lib/utils";
 import { useState } from "react";
 import { sendFriendRequest } from "@/actions/firebase-actions/sendFriendRequest";
 import { toast } from "sonner";
-import { CheckIcon, Loader2Icon, UserPlusIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon } from "lucide-react";
 
 type ProfileHeaderProps = {
   isProfile?: boolean;
@@ -79,13 +79,14 @@ export default function ProfileHeader({
             ) : (
               <Button
                 size="icon"
+                className="w-full"
                 onClick={() => addFriend()}
                 disabled={addLoading}
               >
                 {addLoading ? (
                   <Loader2Icon className="animate-spin size-5" />
                 ) : (
-                  <UserPlusIcon className="size-5" />
+                  "Add Friend"
                 )}
               </Button>
             )}
