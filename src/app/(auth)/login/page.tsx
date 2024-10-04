@@ -71,14 +71,14 @@ export default function Page() {
 
   return (
     <div className="flex justify-center w-full h-[100dvh]">
-      <div className="hidden lg:flex flex-col gap-8 justify-center items-center w-1/2 relative bg-accent border-r border-border">
+      <div className="hidden lg:flex flex-col gap-8 justify-center items-center w-1/2 relative bg-accent/80 border-r border-border">
         <h1 className="text-6xl font-bold">Welcome</h1>
         <p className="text-3xl text-center">
           Login to get full access to the site
         </p>
       </div>
 
-      <div className="bg-accent lg:bg-background flex-1 flex justify-center items-center">
+      <div className="bg-accent/80 lg:bg-background flex-1 flex justify-center items-center">
         <div className="flex flex-col justify-center items-center gap-12 w-3/4">
           <div className="flex flex-col gap-4 items-center lg:hidden">
             <h1 className="text-3xl font-bold">Welcome</h1>
