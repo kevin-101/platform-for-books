@@ -24,22 +24,14 @@ export default async function ProfilePage() {
   const user = (await userRes.json()).data as User;
 
   return (
-    <div className="flex flex-col gap-10 items-center py-4 md:py-8">
+    <div className="flex flex-col gap-10 items-center pt-4 md:pt-8 pb-20 md:pb-24">
       <ProfileHeader isProfile user={user} />
 
-      <div className="flex flex-col gap-4 w-full">
-        <h2 className="text-lg md:text-xl font-medium text-center md:text-start w-full px-4">
-          Your shared books
-        </h2>
+      <Suspense fallback={<BooksLoading />}>
+        <SharedBooks user={user} />
+      </Suspense>
 
-        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">
-          <AddBookButton className="aspect-square rounded-md" />
-
-          <Suspense fallback={<BooksLoading />}>
-            <SharedBooks user={user} />
-          </Suspense>
-        </div>
-      </div>
+      <AddBookButton className="fixed bottom-4 right-6 p-2 rounded-md" />
     </div>
   );
 }

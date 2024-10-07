@@ -51,17 +51,9 @@ export default async function UserProfilePage({
     <div className="flex flex-col gap-10 md:px-4 py-4 md:py-8">
       <ProfileHeader user={user} isFriend={isFriend} />
 
-      <div className="flex flex-col w-full gap-4">
-        <h2 className="text-lg md:text-xl font-medium text-center md:text-start">
-          Shared books
-        </h2>
-
-        <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1">
-          <Suspense fallback={<BooksLoading />}>
-            <SharedBooks user={user} />
-          </Suspense>
-        </div>
-      </div>
+      <Suspense fallback={<BooksLoading />}>
+        <SharedBooks user={user} />
+      </Suspense>
     </div>
   );
 }

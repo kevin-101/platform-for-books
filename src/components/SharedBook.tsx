@@ -138,7 +138,7 @@ export default function SharedBook({
             storage,
             `${user.id}/${
               data.bookName ? data.bookName : sharedBook.bookName
-            } ${new Date().toUTCString()} .${imageFile.type.split("/")[1]}`
+            } ${new Date().toUTCString()}.${imageFile.type.split("/")[1]}`
           );
           await uploadNewImage(newImageRef, imageFile);
           newImageUrl = await getDownloadURL(newImageRef);
