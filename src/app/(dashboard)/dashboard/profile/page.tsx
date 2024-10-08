@@ -37,7 +37,17 @@ export default async function ProfilePage() {
 }
 
 function BooksLoading() {
-  return [...Array(3)].map((_, i) => {
-    return <Skeleton key={i} className="aspect-square" />;
-  });
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <h2 className="text-lg md:text-xl font-medium text-center w-full px-4">
+        Your shared books
+      </h2>
+
+      <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">
+        {[...Array(4)].map((_, i) => {
+          return <Skeleton key={i} className="aspect-square" />;
+        })}
+      </div>
+    </div>
+  );
 }
