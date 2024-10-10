@@ -3,10 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 type SharedBooksProps = {
+  isProfile?: boolean;
   user: User | undefined;
 };
 
-export default async function SharedBooks({ user }: SharedBooksProps) {
+export default async function SharedBooks({
+  isProfile,
+  user,
+}: SharedBooksProps) {
   const booksRes = await fetch(
     `${process.env.APP_DOMAIN}/api/shared-books?id=${user?.id}`
   );
@@ -20,7 +24,7 @@ export default async function SharedBooks({ user }: SharedBooksProps) {
   return sharedBooks && sharedBooks.length > 0 ? (
     <div className="flex flex-col gap-4 w-full">
       <h2 className="text-lg md:text-xl font-medium text-center w-full px-4">
-        Your shared books
+        {isProfile ? "Your shared books" : "Shared Books"}
       </h2>
 
       <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">

@@ -13,7 +13,7 @@ export default function UserLoading() {
 
       <div className="flex flex-col gap-4 w-full">
         <h2 className="text-lg md:text-xl font-medium text-center w-full px-4">
-          Shared books
+          Shared Books
         </h2>
 
         <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">

@@ -28,7 +28,7 @@ export default async function ProfilePage() {
       <ProfileHeader isProfile user={user} />
 
       <Suspense fallback={<BooksLoading />}>
-        <SharedBooks user={user} />
+        <SharedBooks isProfile user={user} />
       </Suspense>
 
       <AddBookButton className="fixed bottom-4 right-6 p-2 rounded-md" />
