@@ -8,7 +8,14 @@ import { formatChatId } from "@/lib/utils";
 import { useState } from "react";
 import { sendFriendRequest } from "@/actions/firebase-actions/sendFriendRequest";
 import { toast } from "sonner";
-import { CheckIcon, Loader2Icon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, Loader2Icon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { removeFriend } from "@/actions/firebase-actions/removeFriend";
 
 type ProfileHeaderProps = {
   isProfile?: boolean;
@@ -24,6 +31,7 @@ export default function ProfileHeader({
   const [currentUser] = useAuthContext();
 
   const [addLoading, setAddLoading] = useState<boolean>(false);
+  const [removeLoading, setRemoveLoading] = useState<boolean>(false);
 
   async function addFriend() {
     if (currentUser && user) {
@@ -42,7 +50,23 @@ export default function ProfileHeader({
     }
   }
 
-  // TODO: add an add friend and chat button
+  async function handleRemoveFriend() {
+    if (currentUser && user) {
+      try {
+        setRemoveLoading(true);
+
+        await removeFriend(currentUser.uid, user.id);
+
+        toast.success("Friend removed");
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong");
+      } finally {
+        setRemoveLoading(false);
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center gap-4 md:gap-8 w-full px-4">
@@ -69,13 +93,31 @@ export default function ProfileHeader({
         {!isProfile && (
           <div className="hidden md:flex flex-col items-center gap-2 w-1/4">
             {isFriend ? (
-              <Button
-                size="icon"
-                className="w-full bg-green-500 dark:bg-green-700 dark:text-foreground"
-                disabled
-              >
-                Friend &nbsp; <CheckIcon className="size-5" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon"
+                    className="w-full bg-green-500 dark:bg-green-700 dark:text-foreground"
+                  >
+                    {removeLoading ? (
+                      <Loader2Icon className="size-5 animate-spin" />
+                    ) : (
+                      <>
+                        Friend &nbsp; <ChevronDownIcon className="size-5" />
+                      </>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] h-12">
+                  <DropdownMenuItem
+                    className="h-full"
+                    onClick={() => handleRemoveFriend()}
+                  >
+                    Remove Friend
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button
                 size="icon"
