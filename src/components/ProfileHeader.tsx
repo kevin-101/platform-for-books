@@ -150,12 +150,31 @@ export default function ProfileHeader({
       {!isProfile && (
         <div className="flex md:hidden gap-2 w-full justify-center px-4 *:w-1/2">
           {isFriend ? (
-            <Button
-              className="bg-green-500 dark:bg-green-700 dark:text-foreground"
-              disabled
-            >
-              Friend &nbsp; <CheckIcon className="size-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  className="bg-green-500 dark:bg-green-700 dark:text-foreground"
+                >
+                  {removeLoading ? (
+                    <Loader2Icon className="size-5 animate-spin" />
+                  ) : (
+                    <>
+                      Friend &nbsp; <ChevronDownIcon className="size-5" />
+                    </>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] h-12">
+                <DropdownMenuItem
+                  className="h-full"
+                  onClick={() => handleRemoveFriend()}
+                >
+                  Remove Friend
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button onClick={() => addFriend()} disabled={addLoading}>
               {addLoading ? (
