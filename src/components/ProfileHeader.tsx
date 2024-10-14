@@ -111,7 +111,7 @@ export default function ProfileHeader({
 
                 <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] h-12">
                   <DropdownMenuItem
-                    className="h-full"
+                    className="h-full text-red-700 dark:text-red-400"
                     onClick={() => handleRemoveFriend()}
                   >
                     Remove Friend
@@ -168,7 +168,7 @@ export default function ProfileHeader({
 
               <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] h-12">
                 <DropdownMenuItem
-                  className="h-full"
+                  className="h-full text-red-700 dark:text-red-400"
                   onClick={() => handleRemoveFriend()}
                 >
                   Remove Friend
