@@ -14,11 +14,11 @@ export default function TopBooks() {
               href={`/dashboard/search`}
               className="flex gap-2 justify-between items-center p-2"
             >
-              <div className="relative size-16 flex items-center justify-center rounded-full bg-accent">
+              <div className="relative shrink-0 size-16 flex items-center justify-center rounded-full bg-accent">
                 <ImageIcon className="size-5" />
               </div>
 
-              <div className="flex flex-col gap-1 flex-1">
+              <div className="flex flex-col gap-1 flex-1 overflow-hidden *:truncate">
                 <h3 className="text-lg font-medium">Book Title</h3>
                 <p>Author</p>
               </div>
