@@ -17,7 +17,7 @@ export default function ProfileLoading() {
         </h2>
 
         <div className="grid grid-cols-3 xl:grid-cols-5 w-full gap-1 md:px-4">
-          {[...Array(11)].map((_, i) => {
+          {[...Array(16)].map((_, i) => {
             return <Skeleton key={i} className="aspect-square" />;
           })}
         </div>
