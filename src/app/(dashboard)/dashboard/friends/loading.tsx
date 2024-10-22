@@ -21,7 +21,7 @@ export default function FriendsLoading() {
           </div>
         </div>
 
-        {[...Array(5)].map((_, i) => {
+        {[...Array(8)].map((_, i) => {
           return (
             <Skeleton
               key={i}
@@ -53,7 +53,7 @@ export function FriendsListLoading() {
         </div>
       </div>
 
-      {[...Array(5)].map((_, i) => {
+      {[...Array(8)].map((_, i) => {
         return (
           <Skeleton
             key={i}
