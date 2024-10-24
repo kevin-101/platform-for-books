@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buttonVariants } from "./ui/button";
 import Image from "next/image";
 import { SheetClose } from "./ui/sheet";
@@ -87,6 +87,8 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
 
   const [recentChats, setRecentChats] = useState<Chat[]>([]);
 
+  const linkRefs = useRef<(HTMLLIElement | null)[]>([]);
+
   useEffect(() => {
     async function getRecentChats() {
       if (recentChatIds && recentChatIds.ids.length > 0) {
@@ -111,6 +113,10 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
 
     getRecentChats();
   }, [recentChatIds]);
+
+  useEffect(() => {
+    linkRefs.current[0]?.scrollIntoView();
+  }, [pathname]);
 
   return (
     <>
@@ -199,7 +205,12 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
         <ul className="flex flex-col gap-2 w-full pl-2">
           {navLinks.map((link, i) => {
             return (
-              <li key={i + link.href}>
+              <li
+                key={i + link.href}
+                ref={(element) => {
+                  linkRefs.current.push(element);
+                }}
+              >
                 {inSheet ? (
                   <SheetClose asChild>
                     <Link
