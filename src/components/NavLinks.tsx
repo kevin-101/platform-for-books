@@ -114,8 +114,9 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
     getRecentChats();
   }, [recentChatIds]);
 
+  // to set scroll position according to active link
   useEffect(() => {
-    linkRefs.current[0]?.scrollIntoView();
+    linkRefs.current[0]?.scrollIntoView({ block: "nearest" });
   }, [pathname]);
 
   return (
