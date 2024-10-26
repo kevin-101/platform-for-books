@@ -68,6 +68,14 @@ const navLinks: LinkType[] = [
   },
 ];
 
+const onlyNavLinks = [
+  "/dashboard/search",
+  "/dashboard/chat",
+  "/dashboard/friends",
+  "/dashboard/add-friend",
+  "/dashboard/friend-requests",
+];
+
 export default function NavLinks({ inSheet = false }: NavLinksProps) {
   const pathname = usePathname();
   const [user] = useAuthContext();
@@ -87,6 +95,7 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
 
   const [recentChats, setRecentChats] = useState<Chat[]>([]);
 
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const linkRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   useEffect(() => {
@@ -116,8 +125,17 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
 
   // to set scroll position according to active link
   useEffect(() => {
-    linkRefs.current[0]?.scrollIntoView({ block: "nearest" });
+    const index = onlyNavLinks.indexOf(pathname);
+    if (index === -1) {
+      setActiveIndex(null);
+      return;
+    }
+    setActiveIndex(index);
   }, [pathname]);
+
+  if (activeIndex) {
+    linkRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
+  }
 
   return (
     <>
