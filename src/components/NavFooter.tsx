@@ -25,7 +25,7 @@ export default function NavFooter({ inSheet }: { inSheet?: boolean }) {
     <div className="flex gap-2 items-center justify-between py-4 w-full">
       {userLoading ? (
         <>
-          <Skeleton className="shrink-0 relative size-12 rounded-full" />
+          <Skeleton className="shrink-0 relative size-[3.5rem] rounded-full" />
 
           <div className="flex flex-col gap-1 flex-1">
             <Skeleton className="h-8 w-full" />
