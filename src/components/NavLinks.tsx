@@ -251,7 +251,15 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                       )}
                     >
                       <div className="flex gap-4 items-center">
-                        <span className="border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors">
+                        <span
+                          className={cn(
+                            "border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors",
+                            {
+                              "border-primary-foreground":
+                                pathname === link.href,
+                            }
+                          )}
+                        >
                           <link.icon className="h-5 w-5 group-hover:stroke-primary-foreground" />
                         </span>
                         {link.name}
@@ -285,7 +293,14 @@ export default function NavLinks({ inSheet = false }: NavLinksProps) {
                     )}
                   >
                     <div className="flex gap-4 items-center">
-                      <span className="border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors">
+                      <span
+                        className={cn(
+                          "border border-primary group-hover:border-primary-foreground p-1 rounded-lg transition-colors",
+                          {
+                            "border-primary-foreground": pathname === link.href,
+                          }
+                        )}
+                      >
                         <link.icon className="h-5 w-5 group-hover:stroke-primary-foreground" />
                       </span>
                       {link.name}
