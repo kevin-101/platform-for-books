@@ -177,7 +177,12 @@ export default function AddBookButton({ className }: AddBookButtonProps) {
         </div>
 
         <DialogFooter>
-          <Button disabled={addLoading} onClick={() => handleAdd()}>
+          <Button
+            disabled={
+              addLoading || (selectedBook && previewPath) ? false : true
+            }
+            onClick={() => handleAdd()}
+          >
             {addLoading ? (
               <Loader2Icon className="size-5 animate-spin" />
             ) : (
