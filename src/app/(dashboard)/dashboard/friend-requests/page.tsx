@@ -15,6 +15,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { MehIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 
@@ -70,9 +71,12 @@ export default function FriendRequestsPage() {
         <h1 className="text-3xl font-bold">Friend Requests</h1>
       </div>
       {friendRequests?.length === 0 ? (
-        <h2 className="text-xl font-medium text-muted-foreground">
-          No friend requests
-        </h2>
+        <div className="flex flex-col gap-4 w-full items-center">
+          <MehIcon className="size-24 md:size-36 stroke-1" />
+          <h2 className="text-xl font-medium text-muted-foreground">
+            No friend requests
+          </h2>
+        </div>
       ) : (
         <FriendRequests requests={friendRequests} user={user} />
       )}
