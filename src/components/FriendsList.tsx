@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "./ui/button";
-import { Loader2Icon, MessageCircleIcon, UserMinus, XIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  MehIcon,
+  MessageCircleIcon,
+  UserMinus,
+  XIcon,
+} from "lucide-react";
 import UserListItem from "./UserListItem";
 import { useState } from "react";
 import Link from "next/link";
@@ -72,7 +78,10 @@ export default function FriendsList({ friends }: FriendsListProps) {
             })}
         </ul>
       ) : (
-        <h1 className="text-xl text-center font-bold">No friends</h1>
+        <div className="flex flex-col gap-4 w-full items-center">
+          <MehIcon className="size-24 md:size-36 stroke-1" />
+          <h1 className="text-xl text-center font-bold">No friends</h1>
+        </div>
       )}
     </div>
   );

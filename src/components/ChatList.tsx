@@ -1,6 +1,7 @@
 "use client";
 
 import { Timestamp } from "firebase/firestore";
+import { MehIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -54,6 +55,9 @@ export default function ChatList({ userId, chats }: ChatListProps) {
       );
     })
   ) : (
-    <h1 className="text-xl font-bold">No chats</h1>
+    <div className="flex flex-col gap-4 w-full items-center">
+      <MehIcon className="size-24 md:size-36 stroke-1" />
+      <h1 className="text-xl font-bold">No chats</h1>
+    </div>
   );
 }
