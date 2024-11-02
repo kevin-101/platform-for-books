@@ -7,7 +7,7 @@ import { Suspense } from "react";
 const SearchField = dynamic(() => import("@/components/SearchField"), {
   loading: () => (
     <div className="flex gap-2 w-full lg:w-3/4 xl:w-1/2 py-2">
-      <Input disabled placeholder="Search for books" />
+      <Input disabled placeholder="Please wait... Loading" />
       <div className="invisible h-10 w-16" />
     </div>
   ),
